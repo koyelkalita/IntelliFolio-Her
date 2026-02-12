@@ -1,20 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { DashboardLayout } from "@/components/dashboard";
 
 export default function TemplatesPage() {
   const router = useRouter();
   const [selectedTemplate, setSelectedTemplate] = useState(null);
-
-  const navigationItems = [
-    { name: "Dashboard", href: "/dashboard", icon: "chart" },
-    { name: "Edit Portfolio", href: "/dashboard/edit", icon: "edit" },
-    { name: "Change Template", href: "/dashboard/templates", icon: "template" },
-    { name: "Change Domain", href: "/dashboard/domain", icon: "settings" },
-    { name: "Preview Portfolio", href: "/dashboard/preview", icon: "eye" },
-  ];
 
   const templates = [
     {
@@ -33,105 +25,6 @@ export default function TemplatesPage() {
     },
   ];
 
-  const getIcon = (type) => {
-    switch (type) {
-      case "chart":
-        return (
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-            />
-          </svg>
-        );
-      case "edit":
-        return (
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-            />
-          </svg>
-        );
-      case "template":
-        return (
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"
-            />
-          </svg>
-        );
-      case "settings":
-        return (
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-          </svg>
-        );
-      case "eye":
-        return (
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-            />
-          </svg>
-        );
-      default:
-        return null;
-    }
-  };
-
   const handleSelectTemplate = (templateId) => {
     setSelectedTemplate(templateId);
     // Redirect to the selected template preview
@@ -139,266 +32,163 @@ export default function TemplatesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f0eb] flex">
-      {/* Sidebar */}
-      <aside className="w-72 bg-[#f5f0eb] border-r border-gray-200 flex flex-col fixed h-full">
-        {/* Logo */}
-        <div className="p-6 flex items-center gap-2">
-          <Link href="/" className="text-2xl font-medium">
-            <span className="text-gray-800">&lt;Intelli</span>
-            <span className="text-red-500">Folio</span>
-            <span className="text-blue-500">-</span>
-            <span className="text-gray-800">Her&gt;</span>
-          </Link>
-          <button className="ml-auto text-gray-600 hover:text-gray-900">
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
+    <DashboardLayout
+      fixedSidebar={true}
+      showMenuButton={true}
+      showHeader={true}
+      headerBackLink="/dashboard/edit"
+      headerBackText="Edit Portfolio"
+    >
+      {/* Template Selection Content */}
+      <div className="p-8">
+        {/* Page Title */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-serif text-gray-900 mb-4">
+            Choose Your Template
+          </h1>
+          <p className="text-gray-600 text-lg">
+            Select a design that best represents your style
+          </p>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 px-4">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
-            Navigation
-          </p>
-          <ul className="space-y-1">
-            {navigationItems.map((item) => (
-              <li key={item.name}>
-                <Link
-                  href={item.href}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                    item.href === "/dashboard/templates"
-                      ? "bg-white/80 text-gray-900 font-medium"
-                      : "text-gray-700 hover:bg-white/60"
+        {/* Template Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {templates.map((template) => (
+            <div
+              key={template.id}
+              className={`bg-white rounded-2xl overflow-hidden shadow-sm border-2 transition-all duration-300 hover:shadow-lg ${
+                selectedTemplate === template.id
+                  ? "border-blue-500 ring-2 ring-blue-200"
+                  : "border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              {/* Template Preview */}
+              <div className="aspect-[4/3] bg-gray-900 relative overflow-hidden">
+                {template.id === "contemporary" ? (
+                  // Contemporary Template Preview
+                  <div className="w-full h-full bg-black flex flex-col items-center justify-center p-6 relative">
+                    {/* Header mockup */}
+                    <div className="absolute top-3 left-4 right-4 flex justify-between items-center">
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 rounded bg-red-500"></div>
+                        <span className="text-white text-[8px]">The Musk</span>
+                      </div>
+                      <div className="flex gap-2 text-[6px] text-gray-400">
+                        <span>Work</span>
+                        <span>About</span>
+                        <span>Resume</span>
+                        <span>Contact</span>
+                      </div>
+                    </div>
+
+                    {/* Tag */}
+                    <div className="absolute top-8 left-1/2 -translate-x-1/2">
+                      <span className="text-[8px] text-yellow-500 border border-yellow-500/30 px-2 py-0.5 rounded-full">
+                        AVAILABLE
+                      </span>
+                    </div>
+
+                    {/* Hero text */}
+                    <div className="text-center mt-4">
+                      <h3 className="text-white text-sm font-light">
+                        Pioneering the{" "}
+                        <span className="text-blue-400">
+                          future of humanity
+                        </span>
+                      </h3>
+                      <button className="mt-2 text-[6px] text-white border border-white/30 px-2 py-0.5 rounded-full">
+                        About me →
+                      </button>
+                    </div>
+
+                    {/* Aurora effect mockup */}
+                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+                      <div className="w-20 h-8 bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-400 blur-sm rounded-full opacity-80"></div>
+                      <div className="w-16 h-6 bg-gradient-to-r from-pink-500 via-red-500 to-orange-400 blur-sm rounded-full opacity-60 -mt-4 mx-auto"></div>
+                    </div>
+
+                    {/* Footer badge */}
+                    <div className="absolute bottom-2 right-3">
+                      <span className="text-[6px] text-gray-500 bg-gray-800 px-1 py-0.5 rounded">
+                        Powered by IntelliFolio
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  // Professional Template Preview
+                  <div className="w-full h-full bg-gray-900 flex relative overflow-hidden">
+                    {/* Left side - Text */}
+                    <div className="w-1/2 p-6 flex flex-col justify-center">
+                      <h3 className="text-white text-2xl font-bold leading-tight">
+                        Elon
+                        <br />
+                        Musk
+                      </h3>
+                      <p className="text-gray-400 text-[8px] mt-2">
+                        Pioneering the future of humanity
+                      </p>
+                    </div>
+
+                    {/* Right side - Image placeholder */}
+                    <div className="w-1/2 relative">
+                      <div className="absolute inset-0 bg-gradient-to-l from-gray-700 to-gray-800 flex items-center justify-center">
+                        <div className="w-24 h-32 bg-gray-600 rounded-lg flex items-center justify-center">
+                          <svg
+                            className="w-12 h-12 text-gray-500"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Footer badge */}
+                    <div className="absolute bottom-2 right-3">
+                      <span className="text-[6px] text-gray-500 bg-gray-800 px-1 py-0.5 rounded">
+                        Made with IntelliFolio
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Template Info */}
+              <div className="p-6 text-center bg-[#f5f0eb]">
+                <h3 className="text-xl font-medium text-blue-600 mb-4">
+                  {template.name}
+                </h3>
+                <button
+                  onClick={() => handleSelectTemplate(template.id)}
+                  className={`px-6 py-2.5 rounded-lg border-2 font-medium transition-all duration-200 ${
+                    selectedTemplate === template.id
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-white text-gray-900 border-gray-300 hover:border-gray-400 hover:bg-gray-50"
                   }`}
                 >
-                  {getIcon(item.icon)}
-                  <span className="text-sm">{item.name}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 ml-72">
-        {/* Top Header */}
-        <header className="bg-[#f5f0eb] border-b border-gray-200 px-8 py-4 flex items-center justify-between sticky top-0 z-10">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/dashboard/edit"
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-              </svg>
-              <span className="text-sm font-medium">Edit Portfolio</span>
-            </Link>
-          </div>
-
-          <div className="flex items-center">
-            <Link href="/" className="text-2xl font-medium">
-              <span className="text-gray-800">&lt;Intelli</span>
-              <span className="text-red-500">Folio</span>
-              <span className="text-blue-500">-</span>
-              <span className="text-gray-800">Her&gt;</span>
-            </Link>
-          </div>
-
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-white/60 transition-colors">
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
-            </svg>
-            <span className="text-sm font-medium">Sign Out</span>
-          </button>
-        </header>
-
-        {/* Template Selection Content */}
-        <div className="p-8">
-          {/* Page Title */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-serif text-gray-900 mb-4">
-              Choose Your Template
-            </h1>
-            <p className="text-gray-600 text-lg">
-              Select a design that best represents your style
-            </p>
-          </div>
-
-          {/* Template Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {templates.map((template) => (
-              <div
-                key={template.id}
-                className={`bg-white rounded-2xl overflow-hidden shadow-sm border-2 transition-all duration-300 hover:shadow-lg ${
-                  selectedTemplate === template.id
-                    ? "border-blue-500 ring-2 ring-blue-200"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
-              >
-                {/* Template Preview */}
-                <div className="aspect-[4/3] bg-gray-900 relative overflow-hidden">
-                  {template.id === "contemporary" ? (
-                    // Contemporary Template Preview
-                    <div className="w-full h-full bg-black flex flex-col items-center justify-center p-6 relative">
-                      {/* Header mockup */}
-                      <div className="absolute top-3 left-4 right-4 flex justify-between items-center">
-                        <div className="flex items-center gap-1">
-                          <div className="w-3 h-3 rounded bg-red-500"></div>
-                          <span className="text-white text-[8px]">
-                            The Musk
-                          </span>
-                        </div>
-                        <div className="flex gap-2 text-[6px] text-gray-400">
-                          <span>Work</span>
-                          <span>About</span>
-                          <span>Resume</span>
-                          <span>Contact</span>
-                        </div>
-                      </div>
-
-                      {/* Tag */}
-                      <div className="absolute top-8 left-1/2 -translate-x-1/2">
-                        <span className="text-[8px] text-yellow-500 border border-yellow-500/30 px-2 py-0.5 rounded-full">
-                          AVAILABLE
-                        </span>
-                      </div>
-
-                      {/* Hero text */}
-                      <div className="text-center mt-4">
-                        <h3 className="text-white text-sm font-light">
-                          Pioneering the{" "}
-                          <span className="text-blue-400">
-                            future of humanity
-                          </span>
-                        </h3>
-                        <button className="mt-2 text-[6px] text-white border border-white/30 px-2 py-0.5 rounded-full">
-                          About me →
-                        </button>
-                      </div>
-
-                      {/* Aurora effect mockup */}
-                      <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-                        <div className="w-20 h-8 bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-400 blur-sm rounded-full opacity-80"></div>
-                        <div className="w-16 h-6 bg-gradient-to-r from-pink-500 via-red-500 to-orange-400 blur-sm rounded-full opacity-60 -mt-4 mx-auto"></div>
-                      </div>
-
-                      {/* Footer badge */}
-                      <div className="absolute bottom-2 right-3">
-                        <span className="text-[6px] text-gray-500 bg-gray-800 px-1 py-0.5 rounded">
-                          Powered by IntelliFolio
-                        </span>
-                      </div>
-                    </div>
-                  ) : (
-                    // Professional Template Preview
-                    <div className="w-full h-full bg-gray-900 flex relative overflow-hidden">
-                      {/* Left side - Text */}
-                      <div className="w-1/2 p-6 flex flex-col justify-center">
-                        <h3 className="text-white text-2xl font-bold leading-tight">
-                          Elon
-                          <br />
-                          Musk
-                        </h3>
-                        <p className="text-gray-400 text-[8px] mt-2">
-                          Pioneering the future of humanity
-                        </p>
-                      </div>
-
-                      {/* Right side - Image placeholder */}
-                      <div className="w-1/2 relative">
-                        <div className="absolute inset-0 bg-gradient-to-l from-gray-700 to-gray-800 flex items-center justify-center">
-                          <div className="w-24 h-32 bg-gray-600 rounded-lg flex items-center justify-center">
-                            <svg
-                              className="w-12 h-12 text-gray-500"
-                              fill="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Footer badge */}
-                      <div className="absolute bottom-2 right-3">
-                        <span className="text-[6px] text-gray-500 bg-gray-800 px-1 py-0.5 rounded">
-                          Made with IntelliFolio
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Template Info */}
-                <div className="p-6 text-center bg-[#f5f0eb]">
-                  <h3 className="text-xl font-medium text-blue-600 mb-4">
-                    {template.name}
-                  </h3>
-                  <button
-                    onClick={() => handleSelectTemplate(template.id)}
-                    className={`px-6 py-2.5 rounded-lg border-2 font-medium transition-all duration-200 ${
-                      selectedTemplate === template.id
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white text-gray-900 border-gray-300 hover:border-gray-400 hover:bg-gray-50"
-                    }`}
-                  >
-                    {selectedTemplate === template.id
-                      ? "Selected"
-                      : "Select Template"}
-                  </button>
-                </div>
+                  {selectedTemplate === template.id
+                    ? "Selected"
+                    : "Select Template"}
+                </button>
               </div>
-            ))}
-          </div>
-
-          {/* Continue Button */}
-          {selectedTemplate && (
-            <div className="text-center mt-8">
-              <button
-                onClick={() => router.push("/dashboard/edit")}
-                className="px-8 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-              >
-                Continue with{" "}
-                {templates.find((t) => t.id === selectedTemplate)?.name}{" "}
-                Template
-              </button>
             </div>
-          )}
+          ))}
         </div>
-      </main>
-    </div>
+
+        {/* Continue Button */}
+        {selectedTemplate && (
+          <div className="text-center mt-8">
+            <button
+              onClick={() => router.push("/dashboard/edit")}
+              className="px-8 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            >
+              Continue with{" "}
+              {templates.find((t) => t.id === selectedTemplate)?.name} Template
+            </button>
+          </div>
+        )}
+      </div>
+    </DashboardLayout>
   );
 }
