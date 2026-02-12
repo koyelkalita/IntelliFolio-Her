@@ -4,9 +4,9 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export default function TemplatesPage() {
+export default function DomainPage() {
   const router = useRouter();
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [subdomain, setSubdomain] = useState("");
 
   const navigationItems = [
     { name: "Dashboard", href: "/dashboard", icon: "chart" },
@@ -14,23 +14,6 @@ export default function TemplatesPage() {
     { name: "Change Template", href: "/dashboard/templates", icon: "template" },
     { name: "Change Domain", href: "/dashboard/domain", icon: "settings" },
     { name: "Preview Portfolio", href: "/dashboard/preview", icon: "eye" },
-  ];
-
-  const templates = [
-    {
-      id: "contemporary",
-      name: "Contemporary",
-      description: "Modern and sleek design with animated backgrounds",
-      preview: "/templates/contemporary-preview.png",
-      hasAnimatedBg: true,
-    },
-    {
-      id: "professional",
-      name: "Professional",
-      description: "Clean and elegant layout for a professional look",
-      preview: "/templates/professional-preview.png",
-      hasAnimatedBg: false,
-    },
   ];
 
   const getIcon = (type) => {
@@ -132,10 +115,12 @@ export default function TemplatesPage() {
     }
   };
 
-  const handleSelectTemplate = (templateId) => {
-    setSelectedTemplate(templateId);
-    // Redirect to the selected template preview
-    router.push(`/dashboard/templates/${templateId}`);
+  const handleContinue = () => {
+    if (subdomain.trim()) {
+      // Save subdomain and navigate to preview
+      console.log(`Subdomain selected: ${subdomain}`);
+      router.push("/dashboard/preview");
+    }
   };
 
   return (
@@ -178,7 +163,7 @@ export default function TemplatesPage() {
                 <Link
                   href={item.href}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                    item.href === "/dashboard/templates"
+                    item.href === "/dashboard/domain"
                       ? "bg-white/80 text-gray-900 font-medium"
                       : "text-gray-700 hover:bg-white/60"
                   }`}
@@ -198,7 +183,7 @@ export default function TemplatesPage() {
         <header className="bg-[#f5f0eb] border-b border-gray-200 px-8 py-4 flex items-center justify-between sticky top-0 z-10">
           <div className="flex items-center gap-4">
             <Link
-              href="/dashboard/edit"
+              href="/dashboard/templates"
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
             >
               <svg
@@ -214,7 +199,7 @@ export default function TemplatesPage() {
                   d="M10 19l-7-7m0 0l7-7m-7 7h18"
                 />
               </svg>
-              <span className="text-sm font-medium">Edit Portfolio</span>
+              <span className="text-sm font-medium">Change Template</span>
             </Link>
           </div>
 
@@ -245,158 +230,74 @@ export default function TemplatesPage() {
           </button>
         </header>
 
-        {/* Template Selection Content */}
+        {/* Domain Selection Content */}
         <div className="p-8">
           {/* Page Title */}
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-serif text-gray-900 mb-4">
-              Choose Your Template
+              Choose Your
+              <br />
+              Subdomain
             </h1>
             <p className="text-gray-600 text-lg">
-              Select a design that best represents your style
+              Your portfolio will be available at{" "}
+              <span className="text-blue-600">
+                yourapp.vercel.app/portfolio/username
+              </span>
             </p>
           </div>
 
-          {/* Template Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {templates.map((template) => (
-              <div
-                key={template.id}
-                className={`bg-white rounded-2xl overflow-hidden shadow-sm border-2 transition-all duration-300 hover:shadow-lg ${
-                  selectedTemplate === template.id
-                    ? "border-blue-500 ring-2 ring-blue-200"
-                    : "border-gray-200 hover:border-gray-300"
+          {/* Subdomain Card */}
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-gray-900 rounded-2xl p-8">
+              {/* Subdomain Label */}
+              <label className="block text-white text-lg font-medium mb-4">
+                Subdomain
+              </label>
+
+              {/* Subdomain Input */}
+              <div className="flex items-center bg-white rounded-lg overflow-hidden mb-6">
+                <span className="px-4 py-4 text-gray-500 bg-gray-50 border-r border-gray-200">
+                  IntelliFolio.Her/
+                </span>
+                <input
+                  type="text"
+                  value={subdomain}
+                  onChange={(e) =>
+                    setSubdomain(
+                      e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""),
+                    )
+                  }
+                  placeholder="yourname"
+                  className="flex-1 px-4 py-4 text-gray-900 focus:outline-none"
+                />
+              </div>
+
+              {/* Preview Box */}
+              <div className="bg-gray-800 rounded-lg p-4 mb-6">
+                <p className="text-gray-400 text-sm mb-1">
+                  Your portfolio will be available at:
+                </p>
+                <p className="text-blue-400 font-mono">
+                  yourapp.vercel.app/portfolio/username
+                  {subdomain || "yourname"}
+                </p>
+              </div>
+
+              {/* Continue Button */}
+              <button
+                onClick={handleContinue}
+                disabled={!subdomain.trim()}
+                className={`w-full py-4 rounded-lg font-medium transition-colors ${
+                  subdomain.trim()
+                    ? "bg-white text-gray-900 hover:bg-gray-100"
+                    : "bg-gray-700 text-gray-400 cursor-not-allowed"
                 }`}
               >
-                {/* Template Preview */}
-                <div className="aspect-[4/3] bg-gray-900 relative overflow-hidden">
-                  {template.id === "contemporary" ? (
-                    // Contemporary Template Preview
-                    <div className="w-full h-full bg-black flex flex-col items-center justify-center p-6 relative">
-                      {/* Header mockup */}
-                      <div className="absolute top-3 left-4 right-4 flex justify-between items-center">
-                        <div className="flex items-center gap-1">
-                          <div className="w-3 h-3 rounded bg-red-500"></div>
-                          <span className="text-white text-[8px]">
-                            The Musk
-                          </span>
-                        </div>
-                        <div className="flex gap-2 text-[6px] text-gray-400">
-                          <span>Work</span>
-                          <span>About</span>
-                          <span>Resume</span>
-                          <span>Contact</span>
-                        </div>
-                      </div>
-
-                      {/* Tag */}
-                      <div className="absolute top-8 left-1/2 -translate-x-1/2">
-                        <span className="text-[8px] text-yellow-500 border border-yellow-500/30 px-2 py-0.5 rounded-full">
-                          AVAILABLE
-                        </span>
-                      </div>
-
-                      {/* Hero text */}
-                      <div className="text-center mt-4">
-                        <h3 className="text-white text-sm font-light">
-                          Pioneering the{" "}
-                          <span className="text-blue-400">
-                            future of humanity
-                          </span>
-                        </h3>
-                        <button className="mt-2 text-[6px] text-white border border-white/30 px-2 py-0.5 rounded-full">
-                          About me →
-                        </button>
-                      </div>
-
-                      {/* Aurora effect mockup */}
-                      <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-                        <div className="w-20 h-8 bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-400 blur-sm rounded-full opacity-80"></div>
-                        <div className="w-16 h-6 bg-gradient-to-r from-pink-500 via-red-500 to-orange-400 blur-sm rounded-full opacity-60 -mt-4 mx-auto"></div>
-                      </div>
-
-                      {/* Footer badge */}
-                      <div className="absolute bottom-2 right-3">
-                        <span className="text-[6px] text-gray-500 bg-gray-800 px-1 py-0.5 rounded">
-                          Powered by IntelliFolio
-                        </span>
-                      </div>
-                    </div>
-                  ) : (
-                    // Professional Template Preview
-                    <div className="w-full h-full bg-gray-900 flex relative overflow-hidden">
-                      {/* Left side - Text */}
-                      <div className="w-1/2 p-6 flex flex-col justify-center">
-                        <h3 className="text-white text-2xl font-bold leading-tight">
-                          Elon
-                          <br />
-                          Musk
-                        </h3>
-                        <p className="text-gray-400 text-[8px] mt-2">
-                          Pioneering the future of humanity
-                        </p>
-                      </div>
-
-                      {/* Right side - Image placeholder */}
-                      <div className="w-1/2 relative">
-                        <div className="absolute inset-0 bg-gradient-to-l from-gray-700 to-gray-800 flex items-center justify-center">
-                          <div className="w-24 h-32 bg-gray-600 rounded-lg flex items-center justify-center">
-                            <svg
-                              className="w-12 h-12 text-gray-500"
-                              fill="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Footer badge */}
-                      <div className="absolute bottom-2 right-3">
-                        <span className="text-[6px] text-gray-500 bg-gray-800 px-1 py-0.5 rounded">
-                          Made with IntelliFolio
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Template Info */}
-                <div className="p-6 text-center bg-[#f5f0eb]">
-                  <h3 className="text-xl font-medium text-blue-600 mb-4">
-                    {template.name}
-                  </h3>
-                  <button
-                    onClick={() => handleSelectTemplate(template.id)}
-                    className={`px-6 py-2.5 rounded-lg border-2 font-medium transition-all duration-200 ${
-                      selectedTemplate === template.id
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white text-gray-900 border-gray-300 hover:border-gray-400 hover:bg-gray-50"
-                    }`}
-                  >
-                    {selectedTemplate === template.id
-                      ? "Selected"
-                      : "Select Template"}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Continue Button */}
-          {selectedTemplate && (
-            <div className="text-center mt-8">
-              <button
-                onClick={() => router.push("/dashboard/edit")}
-                className="px-8 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-              >
-                Continue with{" "}
-                {templates.find((t) => t.id === selectedTemplate)?.name}{" "}
-                Template
+                Continue to Preview
               </button>
             </div>
-          )}
+          </div>
         </div>
       </main>
     </div>
