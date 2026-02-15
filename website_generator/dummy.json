@@ -1,0 +1,76 @@
+{
+  "name": "Ak Sharma",
+  "email": "aksharma@example.com",
+  "phone": "+91 9876543210",
+  "location": "Hyderabad, India",
+  "linkedin": "https://linkedin.com/in/aksharma",
+  "github": "https://github.com/aksharma",
+  "website": "https://aksharma.dev",
+  "headline": "Backend Developer | FastAPI Enthusiast",
+  "bio": "Passionate developer building scalable backend systems and AI-powered applications.",
+  "aiSummary": "Results-driven backend developer experienced in FastAPI, Docker, and AI integrations.",
+  "technicalSkills": ["Python", "FastAPI", "Docker", "PostgreSQL", "Git"],
+  "softSkills": ["Teamwork", "Problem Solving", "Communication"],
+  "languages": ["English", "Hindi"],
+  "experience": [
+    {
+      "id": 1,
+      "title": "Backend Developer Intern",
+      "company": "Tech Solutions Pvt Ltd",
+      "location": "Hyderabad",
+      "startDate": "2024-01",
+      "endDate": null,
+      "current": true,
+      "description": "Developed REST APIs using FastAPI and integrated AI services.",
+      "achievements": [
+        "Improved API response time by 30%",
+        "Containerized services using Docker"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "id": 1,
+      "degree": "B.Tech",
+      "field": "Computer Science",
+      "institution": "XYZ University",
+      "location": "Hyderabad",
+      "startDate": "2022",
+      "endDate": "2026",
+      "gpa": "8.9",
+      "achievements": ["Dean’s List", "Scholarship Awardee"]
+    }
+  ],
+  "projects": [
+    {
+      "id": 1,
+      "name": "AI Portfolio Generator",
+      "description": "Generates personal portfolio websites using structured profile data.",
+      "technologies": ["Python", "FastAPI", "Jinja2", "Docker"],
+      "link": "https://github.com/aksharma/portfolio-generator",
+      "demoLink": null,
+      "startDate": "2025-01",
+      "endDate": "2025-02"
+    }
+  ],
+  "publications": [
+    {
+      "id": 1,
+      "title": "AI in Resume Parsing",
+      "journal": "International Journal of AI",
+      "authors": "Ak Sharma",
+      "year": "2025",
+      "doi": null,
+      "link": null
+    }
+  ],
+  "awards": [
+    {
+      "id": 1,
+      "title": "Best Innovation Award",
+      "organization": "XYZ University",
+      "year": "2024",
+      "description": "Awarded for building an AI-driven resume analyzer."
+    }
+  ]
+}
