@@ -2,9 +2,12 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { DashboardLayout, SignOutButton } from "@/components/dashboard";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function DashboardPage() {
-  const [userName] = useState("Koyel Kalita");
+  const { currentUser } = useAuth();
+  const [userName] = useState(currentUser?.displayName || "User");
 
   // Mock portfolio data
   const portfolioData = {
@@ -87,9 +90,10 @@ export default function DashboardPage() {
   };
 
   return (
-    <DashboardLayout>
-      {/* Main Content */}
-      <div className="flex-1 p-8">
+    <ProtectedRoute>
+      <DashboardLayout>
+        {/* Main Content */}
+        <div className="flex-1 p-8">
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div>
@@ -413,6 +417,7 @@ export default function DashboardPage() {
           </div>
         </section>
       </div>
-    </DashboardLayout>
+      </DashboardLayout>
+    </ProtectedRoute>
   );
 }
