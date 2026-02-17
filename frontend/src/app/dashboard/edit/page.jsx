@@ -7,6 +7,8 @@ import { DashboardSidebar } from "@/components/dashboard";
 export default function EditPortfolioPage() {
   const [currentSection, setCurrentSection] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+
 
   const sections = [
     "Personal Information",
@@ -1281,6 +1283,39 @@ export default function EditPortfolioPage() {
         return null;
     }
   };
+  const handleGeneratePortfolio = async () => {
+  setLoading(true);
+
+  try {
+    const res = await fetch("http://localhost:5000/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        formData,
+        workExperience,
+        education,
+        projects,
+        publications,
+        awards
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.status === "success") {
+      window.open(`http://localhost:5000${data.url}`, "_blank");
+    } else {
+      alert("Generation failed");
+    }
+
+  } catch (err) {
+    alert("Backend not running");
+  }
+
+  setLoading(false);
+};
 
   return (
     <div className="min-h-screen bg-[#f5f0eb] flex">
@@ -1403,10 +1438,11 @@ export default function EditPortfolioPage() {
         {/* Footer */}
         <footer className="bg-[#f5f0eb] border-t border-gray-200 px-8 py-6">
           <div className="flex justify-center">
-            <Link
-              href="/dashboard/preview"
+            <button
+              onClick={handleGeneratePortfolio}
               className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
-            >
+>
+
               <svg
                 className="w-5 h-5"
                 fill="none"
@@ -1420,8 +1456,8 @@ export default function EditPortfolioPage() {
                   d="M13 10V3L4 14h7v7l9-11h-7z"
                 />
               </svg>
-              Create Portfolio Site →
-            </Link>
+             {loading ? "Generating..." : "Create Portfolio Site →"}
+            </button>
           </div>
         </footer>
       </main>
