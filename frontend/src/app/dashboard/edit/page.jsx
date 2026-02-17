@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { DashboardSidebar } from "@/components/dashboard";
+import { generatePortfolio } from "@/lib/api";
+
 
 export default function EditPortfolioPage() {
   const [currentSection, setCurrentSection] = useState(0);
@@ -1283,39 +1285,7 @@ export default function EditPortfolioPage() {
         return null;
     }
   };
-  const handleGeneratePortfolio = async () => {
-  setLoading(true);
 
-  try {
-    const res = await fetch("http://localhost:5000/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        formData,
-        workExperience,
-        education,
-        projects,
-        publications,
-        awards
-      })
-    });
-
-    const data = await res.json();
-
-    if (data.status === "success") {
-      window.open(`http://localhost:5000${data.url}`, "_blank");
-    } else {
-      alert("Generation failed");
-    }
-
-  } catch (err) {
-    alert("Backend not running");
-  }
-
-  setLoading(false);
-};
 
   return (
     <div className="min-h-screen bg-[#f5f0eb] flex">
