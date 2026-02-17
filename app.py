@@ -253,72 +253,37 @@ def generate_portfolio(user, repos, resume_sections, contact):
     """
 
 
-@app.route("/", methods=["GET", "POST"])
-def home():
+@app.route("/generate", methods=["POST"])
+def generate():
 
-    if request.method == "POST":
+    username = request.form.get("username")
+    resume_file = request.files.get("resume")
 
-        username = request.form.get("username")
-        resume_file = request.files.get("resume")
+    user_res = requests.get(f"https://api.github.com/users/{username}")
+    repo_res = requests.get(f"https://api.github.com/users/{username}/repos?sort=updated")
 
-        user_res = requests.get(f"https://api.github.com/users/{username}")
-        repo_res = requests.get(f"https://api.github.com/users/{username}/repos?sort=updated")
+    if user_res.status_code != 200:
+        return {"status": "error", "message": "GitHub user not found"}
 
-        if user_res.status_code != 200:
-            return "<h2>GitHub user not found.</h2>"
+    user_data = user_res.json()
+    repo_data = repo_res.json()
 
-        user_data = user_res.json()
-        repo_data = repo_res.json()
+    resume_text = extract_text_from_pdf(resume_file)
+    resume_sections = parse_resume_sections(resume_text)
+    contact_info = extract_contact_info(resume_text)
 
-        resume_text = extract_text_from_pdf(resume_file)
-        resume_sections = parse_resume_sections(resume_text)
-        contact_info = extract_contact_info(resume_text)
+    html_content = generate_portfolio(user_data, repo_data, resume_sections, contact_info)
 
+    filename = f"generated_portfolios/{username}.html"
 
-        html_content = generate_portfolio(user_data, repo_data, resume_sections, contact_info)
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write(html_content)
 
-        filename = f"generated_portfolios/{username}.html"
+    return {
+        "status": "success",
+        "url": f"/portfolio/{username}"
+    }
 
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(html_content)
-
-        return f"""
-        <h2>Portfolio Generated Successfully 🎉</h2>
-        <p>Share this link:</p>
-        <a href="/portfolio/{username}" target="_blank">
-            {request.host_url}portfolio/{username}
-        </a>
-        """
-
-
-    return """
-    <html>
-    <head>
-        <title>Smart Portfolio Generator</title>
-        <style>
-            body {
-                font-family: Arial;
-                text-align: center;
-                margin-top: 100px;
-                background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-                color: white;
-            }
-            input, button {
-                padding: 10px;
-                margin: 10px;
-            }
-        </style>
-    </head>
-    <body>
-        <h1>✨ Smart GitHub + Resume Portfolio</h1>
-        <form method="POST" enctype="multipart/form-data">
-            <input type="text" name="username" placeholder="GitHub Username" required><br>
-            <input type="file" name="resume" accept=".pdf" required><br>
-            <button type="submit">Generate Portfolio</button>
-        </form>
-    </body>
-    </html>
-    """
 @app.route("/portfolio/<username>")
 def serve_portfolio(username):
     filepath = f"generated_portfolios/{username}.html"
@@ -331,3 +296,4 @@ def serve_portfolio(username):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
