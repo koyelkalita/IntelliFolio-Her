@@ -186,6 +186,19 @@ export default function EditPortfolioPage() {
       .toUpperCase()
       .slice(0, 2);
   };
+  const handleGenerate = async () => {
+  const result = await generatePortfolio({
+    formData,
+    workExperience,
+    education,
+    projects,
+    publications,
+    awards
+  });
+
+  console.log(result);
+};
+
 
   const getSectionIcon = (section) => {
     switch (section) {
@@ -1409,7 +1422,7 @@ export default function EditPortfolioPage() {
         <footer className="bg-[#f5f0eb] border-t border-gray-200 px-8 py-6">
           <div className="flex justify-center">
             <button
-              onClick={handleGeneratePortfolio}
+              onClick={handleGenerate}
               className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
 >
 
