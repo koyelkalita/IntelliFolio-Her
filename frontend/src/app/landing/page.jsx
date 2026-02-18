@@ -3,7 +3,15 @@
 import React, { useState, useRef } from "react";
 import Link from "next/link";
 import { Particles } from "@/components/ui/particles";
+import { TypewriterEffectSmooth } from "@/components/ui/typewriter-effect";
+
 function LandingPage() {
+  const words = [
+    { text: "Build  " },
+    { text: "your  " },
+    { text: "portfolio  " },
+    { text: "website  " },
+  ];
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
   const fileInputRef = useRef(null);
@@ -47,7 +55,12 @@ function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f0eb]">
+    <div
+      className="min-h-screen relative overflow-hidden"
+      style={{
+        background: "linear-gradient(to left, #C9C5B1 0%, #FAFFFA 100%)",
+      }}
+    >
       {/* Header */}
       <header className="flex items-center justify-between px-8 py-6 max-w-7xl mx-auto">
         {/* Logo */}
@@ -61,16 +74,10 @@ function LandingPage() {
         {/* Navigation */}
         <nav className="flex items-center gap-8">
           <Link
-            href="/blog"
+            href="/features"
             className="text-gray-700 hover:text-gray-900 transition-colors"
           >
-            Blog
-          </Link>
-          <Link
-            href="/careers"
-            className="text-gray-700 hover:text-gray-900 transition-colors"
-          >
-            Careers
+            Features
           </Link>
           <Link
             href="/dashboard"
@@ -81,27 +88,27 @@ function LandingPage() {
         </nav>
       </header>
       {/* Hero Section */}
-      <main className="max-w-7xl mx-auto h-[calc(100vh-186px)] px-8 pt-16 pb-24 flex items-center justify-between">
-        <div className="w-full flex items-center justify-between gap-16">
-          {/* Left Content */}
-          <div className="flex-1">
-            <h1 className="text-6xl font-bold text-gray-900 leading-tight mb-4">
-              Build your
-              <br />
-              personal website
-            </h1>
+      <main className="max-w-7xl mx-auto px-8 pt-16 pb-24 flex flex-col gap-12">
+        {/* Top Content (was left) */}
+        <div className="w-full flex flex-col items-center justify-center mb-12">
+          <h1 className="text-6xl font-bold text-gray-900 leading-tight mb-4 text-center">
+            <TypewriterEffectSmooth words={words} />
+          </h1>
+          <p className="text-gray-600 text-xl mb-8 text-center">
+            Your story, beautifully generated
+          </p>
+          <Link
+            href="/dashboard"
+            className="inline-block bg-black text-white px-8 py-4 rounded-md hover:bg-gray-800 transition-colors font-medium text-lg"
+          >
+            Go to Dashboard
+          </Link>
+        </div>
 
-            <p className="text-gray-600 text-lg mb-8">show off in style</p>
-            <Link
-              href="/dashboard"
-              className="inline-block bg-black text-white px-8 py-4 rounded-md hover:bg-gray-800 transition-colors font-medium text-lg"
-            >
-              Go to Dashboard
-            </Link>
-          </div>
-
-          {/* Right Content - Upload Area */}
-          <div className="flex-1 flex justify-center">
+        {/* Bottom Content: Upload left, Info right */}
+        <div className="w-full flex flex-col md:flex-row items-stretch justify-between gap-16">
+          {/* Upload Area (left) */}
+          <div className="flex-1 flex justify-center items-center">
             <div
               onClick={handleUploadClick}
               onDragOver={handleDragOver}
@@ -198,6 +205,17 @@ function LandingPage() {
                 </>
               )}
             </div>
+          </div>
+          {/* Info Area (right) */}
+          <div className="flex-1 flex flex-col justify-center items-center text-center md:text-left md:items-start">
+            <h2 className="text-3xl font-semibold mb-4 text-gray-800">
+              Why upload your resume?
+            </h2>
+            <p className="text-gray-600 text-lg mb-4">
+              Easily generate a professional portfolio website from your resume.
+              Our AI will extract your skills, experience, achievements and more
+              to create your portfolio website.
+            </p>
           </div>
         </div>
       </main>
