@@ -3,6 +3,8 @@
 import DashboardSidebar from "./DashboardSidebar";
 import Logo from "./Logo";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function DashboardLayout({
   children,
@@ -61,8 +63,23 @@ export default function DashboardLayout({
 }
 
 export function SignOutButton() {
+  const router = useRouter();
+  const { logout } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await logout();
+      router.push("/auth/signin");
+    } catch (error) {
+      console.error("Sign out failed:", error);
+    }
+  };
+
   return (
-    <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-white/60 transition-colors">
+    <button
+      onClick={handleSignOut}
+      className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-white/60 transition-colors"
+    >
       <svg
         className="w-5 h-5"
         fill="none"
