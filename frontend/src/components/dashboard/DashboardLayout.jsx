@@ -69,7 +69,7 @@ export function SignOutButton() {
   const handleSignOut = async () => {
     try {
       await logout();
-      router.push("/auth/signin");
+      router.push("/landing");
     } catch (error) {
       console.error("Sign out failed:", error);
     }

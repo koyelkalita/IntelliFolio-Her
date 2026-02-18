@@ -2,10 +2,12 @@
 
 import React, { useState, useRef } from "react";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
 import { Particles } from "@/components/ui/particles";
 import { TypewriterEffectSmooth } from "@/components/ui/typewriter-effect";
 
 function LandingPage() {
+  const { currentUser } = useAuth();
   const words = [
     { text: "Build  " },
     { text: "your  " },
@@ -79,12 +81,29 @@ function LandingPage() {
           >
             Features
           </Link>
-          <Link
-            href="/dashboard"
-            className="bg-black text-white px-6 py-3 rounded-md hover:bg-gray-800 transition-colors font-medium"
-          >
-            Go to Dashboard
-          </Link>
+          {currentUser ? (
+            <Link
+              href="/dashboard"
+              className="bg-black text-white px-6 py-3 rounded-md hover:bg-gray-800 transition-colors font-medium"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/auth/signin"
+                className="bg-black text-white px-6 py-3 rounded-md hover:bg-gray-800 transition-colors font-medium"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/auth/signup"
+                className="ml-4 bg-white text-black px-6 py-3 rounded-md border border-black hover:bg-gray-100 transition-colors font-medium"
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
         </nav>
       </header>
       {/* Hero Section */}
@@ -97,12 +116,29 @@ function LandingPage() {
           <p className="text-gray-600 text-xl mb-8 text-center">
             Your story, beautifully generated
           </p>
-          <Link
-            href="/dashboard"
-            className="inline-block bg-black text-white px-8 py-4 rounded-md hover:bg-gray-800 transition-colors font-medium text-lg"
-          >
-            Go to Dashboard
-          </Link>
+          {currentUser ? (
+            <Link
+              href="/dashboard"
+              className="inline-block bg-black text-white px-8 py-4 rounded-md hover:bg-gray-800 transition-colors font-medium text-lg"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <div className="flex gap-4">
+              <Link
+                href="/auth/signin"
+                className="inline-block bg-black text-white px-8 py-4 rounded-md hover:bg-gray-800 transition-colors font-medium text-lg"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/auth/signup"
+                className="inline-block bg-white text-black px-8 py-4 rounded-md border border-black hover:bg-gray-100 transition-colors font-medium text-lg"
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Bottom Content: Upload left, Info right */}
