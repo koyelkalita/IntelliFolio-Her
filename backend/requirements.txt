@@ -4,3 +4,4 @@ sqlalchemy
 psycopg2-binary
 passlib[bcrypt]
 pydantic
+pymupdf-1.27.1
