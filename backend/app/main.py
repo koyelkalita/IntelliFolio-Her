@@ -1,6 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.ai import router as ai_router
+from app.db import models  # Import models to register them with SQLAlchemy
+from app.db.database import engine, init_db
+
+# Initialize database tables on startup
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="IntelliFolio-Her")
 
