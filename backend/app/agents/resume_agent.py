@@ -3,14 +3,9 @@ import re
 from fastapi import HTTPException
 from app.services.llm_services import call_llm
 from app.schemas.resume_schema import ResumeProfile
+from app.utils.extract_json import extract_json
 
 
-def extract_json(text: str) -> str:
-    text = text.replace("```json", "").replace("```", "")
-    match = re.search(r"\{.*\}", text, re.DOTALL)
-    if not match:
-        raise HTTPException(status_code=500, detail="No JSON found in AI response")
-    return match.group(0)
 
 
 def extract_social_links(text: str):
@@ -150,6 +145,4 @@ def parse_resume(text: str) -> dict:
         validated = ResumeProfile(**data)
         return validated.model_dump()
     except Exception as e:
-        print("FINAL MERGED DATA:\n", data)
-        print("VALIDATION ERROR:\n", e)
         raise HTTPException(status_code=500, detail="Resume validation failed")

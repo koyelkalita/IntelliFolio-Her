@@ -2,17 +2,14 @@ import json
 import re
 from fastapi import HTTPException
 from app.services.llm_services import call_llm
+from app.utils.extract_json import extract_json
 from app.services.github_service import (
     fetch_user_repos,
     fetch_user_profile,
     fetch_profile_readme
 )
 
-def extract_json(text: str) -> str:
-    match = re.search(r"\{.*\}", text, re.DOTALL)
-    if not match:
-        raise HTTPException(status_code=500, detail="No JSON found in AI response")
-    return match.group(0)
+
 
 def summarize_github_profile(username: str) -> dict:
     profile_data = fetch_user_profile(username)
@@ -56,6 +53,4 @@ Repositories:
         return data
     
     except json.JSONDecodeError:
-        print("raw ai output:\n", raw_output)
-
         raise HTTPException(status_code=500, detail="Failed to parse AI response")  
