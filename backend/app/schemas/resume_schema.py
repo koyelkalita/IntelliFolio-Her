@@ -1,6 +1,12 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
 
+# class Project(BaseModel):
+#     name: str
+#     description: Optional[str] = None
+#     github_url: Optional[str] = None
+#     technologies: List[str] = Field(default_factory=list)
+
 
 class SocialLinks(BaseModel):
     github: Optional[str] = None
