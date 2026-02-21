@@ -5,24 +5,34 @@ from app.services.llm_services import call_llm
 from app.utils.extract_json import extract_json
 
 
-
-
-
 def enhance_profile_content(profile_data: dict) -> dict:
     """
-    Enhances structured profile data to produce:
-    - headline
-    - enhanced_summary
-    - enhanced experience bullets
-    - enhanced project descriptions
+    Enhances structured profile data.
+    Flexible field name handling.
     """
+
+    # Normalize field names for LLM
+    experience = []
+    for exp in profile_data.get("experience", []):
+        experience.append({
+            "title": exp.get("title"),
+            "company": exp.get("organization") or exp.get("company"),
+            "description": exp.get("description", [])
+        })
+
+    projects = []
+    for proj in profile_data.get("projects", []):
+        projects.append({
+            "name": proj.get("name"),
+            "description": proj.get("description", [])
+        })
 
     minimal_input = {
         "name": profile_data.get("name"),
         "summary": profile_data.get("summary"),
         "technicalSkills": profile_data.get("technicalSkills", []),
-        "experience": profile_data.get("experience", []),
-        "projects": profile_data.get("projects", [])
+        "experience": experience,
+        "projects": projects
     }
 
     prompt = f"""
