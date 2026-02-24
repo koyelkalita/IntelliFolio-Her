@@ -4,13 +4,13 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCDQ1LSdZvK5oFGLU8oDC8tgAKAzA5J14E",
-  authDomain: "intellifolio-her-a9ba1.firebaseapp.com",
-  projectId: "intellifolio-her-a9ba1",
-  storageBucket: "intellifolio-her-a9ba1.firebasestorage.app",
-  messagingSenderId: "173989490590",
-  appId: "1:173989490590:web:7e8c4506f1ee2e5cf0b08f",
-  measurementId: "G-J6GL38WKR8"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);
