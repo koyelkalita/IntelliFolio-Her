@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+passlib[bcrypt]
+pydantic
+pymupdf
+python-dotenv
+alembic
+cryptography
+email-validator
+google-genai
+firebase-admin
+python-multipart
