@@ -7,3 +7,4 @@ class BuildProfileRequest(BaseModel):
     github_username: Optional[str] = None
     resume_data: Optional[Dict] = None
     github_data: Optional[Dict] = None
+    template_type: Optional[str] = "professional"

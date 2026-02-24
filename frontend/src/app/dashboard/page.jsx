@@ -1,13 +1,17 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import { DashboardLayout, SignOutButton } from "@/components/dashboard";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
+import { getPortfolios } from "@/lib/api";
 
 export default function DashboardPage() {
   const { currentUser } = useAuth();
   const [userName] = useState(currentUser?.displayName || "User");
+  const [portfolios, setPortfolios] = useState([]);
+  const [loadingPortfolios, setLoadingPortfolios] = useState(true);
 
   // Mock portfolio data
   const portfolioData = {
@@ -31,6 +35,26 @@ export default function DashboardPage() {
   useEffect(() => {
     setPortfolioScore(Math.floor(Math.random() * 26) + 60);
   }, []);
+
+  // Fetch user's portfolios
+  useEffect(() => {
+    async function fetchPortfolios() {
+      try {
+        if (!currentUser) return;
+        const token = await currentUser.getIdToken();
+        const result = await getPortfolios(token);
+        if (result.status === "success") {
+          setPortfolios(result.portfolios || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch portfolios:", error);
+      } finally {
+        setLoadingPortfolios(false);
+      }
+    }
+
+    fetchPortfolios();
+  }, [currentUser]);
 
   // Generate AI suggestions based on mock conditions
   const aiSuggestions = useMemo(() => {
@@ -102,8 +126,111 @@ export default function DashboardPage() {
             </h1>
             <p className="text-gray-500 mt-1">Your Portfolio Control Center</p>
           </div>
-          <SignOutButton />
+          <div className="flex gap-3">
+            <a
+              href="/dashboard/create"
+              className="px-6 py-2 bg-stone-800 text-white rounded-lg hover:bg-stone-900 transition-colors font-medium"
+            >
+              + Create Portfolio
+            </a>
+            <SignOutButton />
+          </div>
         </div>
+
+        {/* Your Portfolios Section */}
+        {portfolios.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Your Portfolios</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {portfolios.map((portfolio) => (
+                <div
+                  key={portfolio.id}
+                  className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="font-semibold text-lg text-gray-900 flex-1">
+                      {portfolio.title}
+                    </h3>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        portfolio.status === "published"
+                          ? "bg-amber-100 text-amber-700"
+                          : "bg-gray-100 text-gray-700"
+                      }`}
+                    >
+                      {portfolio.status === "published" ? "Published" : "Draft"}
+                    </span>
+                  </div>
+
+                  <p className="text-sm text-gray-500 mb-4">
+                    Created {new Date(portfolio.created_at).toLocaleDateString()}
+                  </p>
+
+                  <div className="flex flex-col gap-2">
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/dashboard/edit?portfolio=${portfolio.slug}`}
+                        className="flex-1 px-4 py-2 text-sm font-medium text-center text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                      >
+                        Edit
+                      </Link>
+                      <a
+                        href={`/${portfolio.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 px-4 py-2 text-sm font-medium text-center text-white bg-stone-800 hover:bg-stone-900 rounded-lg transition-colors"
+                      >
+                        View
+                      </a>
+                    </div>
+                    {portfolio.status !== "published" && (
+                      <button
+                        onClick={async () => {
+                          try {
+                            if (!currentUser) return;
+                            const token = await currentUser.getIdToken();
+                            const response = await fetch(
+                              `http://localhost:8000/portfolios/${portfolio.id}/publish`,
+                              {
+                                method: "POST",
+                                headers: { Authorization: `Bearer ${token}` },
+                              }
+                            );
+                            if (response.ok) {
+                              // Refresh portfolios
+                              const result = await getPortfolios(token);
+                              if (result.status === "success") {
+                                setPortfolios(result.portfolios || []);
+                              }
+                            }
+                          } catch (error) {
+                            console.error("Publish error:", error);
+                          }
+                        }}
+                        className="w-full px-4 py-2 text-sm font-medium text-center text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                      >
+                        Publish
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {portfolios.length === 0 && !loadingPortfolios && (
+          <section className="mb-8 p-8 bg-blue-50 rounded-xl border border-blue-200">
+            <h3 className="font-semibold text-lg text-blue-900 mb-2">No Portfolios Yet</h3>
+            <p className="text-blue-800 mb-4">Create your first portfolio to get started!</p>
+            <Link
+              href="/dashboard/create"
+              className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              Create Your First Portfolio
+            </Link>
+          </section>
+        )}
 
         {/* Top Row - 3 Cards */}
         <section className="mb-8">

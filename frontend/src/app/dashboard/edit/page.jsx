@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { DashboardSidebar } from "@/components/dashboard";
-import { generatePortfolio } from "@/lib/api";
+import { updatePortfolio } from "@/lib/api";
 
 
 export default function EditPortfolioPage() {
@@ -187,17 +187,10 @@ export default function EditPortfolioPage() {
       .slice(0, 2);
   };
   const handleGenerate = async () => {
-  const result = await generatePortfolio({
-    formData,
-    workExperience,
-    education,
-    projects,
-    publications,
-    awards
-  });
-
-  console.log(result);
-};
+    // This would update an existing portfolio
+    // Example: await updatePortfolio(portfolioId, { formData, workExperience, ... }, token);
+    console.log("Portfolio generation not yet implemented");
+  };
 
 
   const getSectionIcon = (section) => {
