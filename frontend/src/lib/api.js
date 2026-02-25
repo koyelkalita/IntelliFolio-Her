@@ -1,15 +1,167 @@
-/**
- * API client for backend integration
- * Base URL: http://localhost:8000
- */
+const API_BASE = "http://localhost:8000";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+// ─── Generate Portfolio ───
+export async function generatePortfolio(data) {
+  try {
+    const res = await fetch(`${API_BASE}/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    return await res.json();
+  } catch (err) {
+    return { status: "error", message: "Server error" };
+  }
+}
 
-/**
- * Generic fetch wrapper with error handling
- */
+// ─── Authenticated Portfolio Endpoints ───
+export async function getPortfolios(token) {
+  try {
+    const res = await fetch(`${API_BASE}/portfolios`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return await res.json();
+  } catch (err) {
+    return { status: "error", message: "Server error" };
+  }
+}
+
+// ─── CRUD Fetch Endpoints (no auth required) ───
+
+export async function getPortfolioProfile(portfolioId) {
+  try {
+    const res = await fetch(`${API_BASE}/api/portfolios/${portfolioId}/profile`);
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error("Failed to fetch profile");
+    return await res.json();
+  } catch (err) {
+    console.error("getPortfolioProfile error:", err);
+    return null;
+  }
+}
+
+export async function getPortfolioSkills(portfolioId) {
+  try {
+    const res = await fetch(`${API_BASE}/api/portfolios/${portfolioId}/skills`);
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (err) {
+    return [];
+  }
+}
+
+export async function getPortfolioProjects(portfolioId) {
+  try {
+    const res = await fetch(`${API_BASE}/api/portfolios/${portfolioId}/projects`);
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (err) {
+    return [];
+  }
+}
+
+export async function getPortfolioSocialLinks(portfolioId) {
+  try {
+    const res = await fetch(`${API_BASE}/api/portfolios/${portfolioId}/social-links`);
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (err) {
+    return [];
+  }
+}
+
+export async function getPortfolioSections(portfolioId) {
+  try {
+    const res = await fetch(`${API_BASE}/api/portfolios/${portfolioId}/sections`);
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (err) {
+    return [];
+  }
+}
+
+// ─── CRUD Save Endpoints ───
+
+export async function saveProfileData(portfolioId, data) {
+  const res = await fetch(`${API_BASE}/api/portfolios/${portfolioId}/profile`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to save profile");
+  return await res.json();
+}
+
+export async function deleteSkill(skillId) {
+  await fetch(`${API_BASE}/api/skills/${skillId}`, { method: "DELETE" });
+}
+
+export async function bulkCreateSkills(portfolioId, skills) {
+  if (!skills.length) return [];
+  const res = await fetch(`${API_BASE}/api/portfolios/${portfolioId}/skills/bulk`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(skills),
+  });
+  if (!res.ok) throw new Error("Failed to save skills");
+  return await res.json();
+}
+
+export async function deleteSocialLink(linkId) {
+  await fetch(`${API_BASE}/api/social-links/${linkId}`, { method: "DELETE" });
+}
+
+export async function bulkCreateSocialLinks(portfolioId, links) {
+  if (!links.length) return [];
+  const res = await fetch(`${API_BASE}/api/portfolios/${portfolioId}/social-links/bulk`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(links),
+  });
+  if (!res.ok) throw new Error("Failed to save social links");
+  return await res.json();
+}
+
+export async function createSection(portfolioId, data) {
+  const res = await fetch(`${API_BASE}/api/portfolios/${portfolioId}/sections`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to create section");
+  return await res.json();
+}
+
+export async function updateSection(sectionId, data) {
+  const res = await fetch(`${API_BASE}/api/sections/${sectionId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to update section");
+  return await res.json();
+}
+
+export async function deleteSection(sectionId) {
+  await fetch(`${API_BASE}/api/sections/${sectionId}`, { method: "DELETE" });
+}
+
+export async function createProject(portfolioId, data) {
+  const res = await fetch(`${API_BASE}/api/portfolios/${portfolioId}/projects`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to create project");
+  return await res.json();
+}
+
+export async function deleteProject(projectId) {
+  await fetch(`${API_BASE}/api/projects/${projectId}`, { method: "DELETE" });
+}
+
 async function apiCall(endpoint, options = {}) {
-  const url = `${API_BASE_URL}${endpoint}`;
+  const url = `${API_BASE}${endpoint}`;
   
   const headers = {
     "Content-Type": "application/json",
@@ -86,7 +238,7 @@ export async function parseResume(file, firebaseToken) {
   formData.append("file", file);
 
   try {
-    const response = await fetch(`${API_BASE_URL}/ai/parse-resume`, {
+    const response = await fetch(`${API_BASE}/ai/parse-resume`, {
       method: "POST",
       body: formData,
       headers: {
@@ -108,13 +260,13 @@ export async function parseResume(file, firebaseToken) {
 /**
  * Get user portfolios
  */
-export async function getPortfolios(firebaseToken) {
-  return apiCall("/portfolios", {
-    headers: {
-      Authorization: `Bearer ${firebaseToken}`,
-    },
-  });
-}
+// export async function getPortfolios(firebaseToken) {
+//   return apiCall("/portfolios", {
+//     headers: {
+//       Authorization: `Bearer ${firebaseToken}`,
+//     },
+//   });
+// }
 
 /**
  * Get single portfolio
@@ -158,4 +310,3 @@ export async function publishPortfolio(portfolioId, firebaseToken) {
     },
   });
 }
-
