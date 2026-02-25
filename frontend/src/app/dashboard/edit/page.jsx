@@ -1,16 +1,43 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { DashboardSidebar } from "@/components/dashboard";
-import { updatePortfolio } from "@/lib/api";
-
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  generatePortfolio,
+  getPortfolios,
+  getPortfolioProfile,
+  getPortfolioSkills,
+  getPortfolioProjects,
+  getPortfolioSocialLinks,
+  getPortfolioSections,
+  saveProfileData,
+  deleteSkill,
+  bulkCreateSkills,
+  deleteSocialLink,
+  bulkCreateSocialLinks,
+  createSection,
+  updateSection,
+  createProject,
+  deleteProject,
+} from "@/lib/api";
 
 export default function EditPortfolioPage() {
+  const { currentUser } = useAuth();
   const [currentSection, setCurrentSection] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [portfolioId, setPortfolioId] = useState(null);
+  const [fetchError, setFetchError] = useState(null);
+  const [existingIds, setExistingIds] = useState({
+    skills: [],
+    socialLinks: [],
+    projects: [],
+    sections: {},
+  });
 
   const sections = [
     "Personal Information",
@@ -25,13 +52,12 @@ export default function EditPortfolioPage() {
   ];
 
   const [formData, setFormData] = useState({
-    // Personal Information
-    name: "Name Name",
-    email: "name@gmail.com",
-    phone: "+91 xxxxxxxxxx",
-    location: "city, state",
-    linkedin: "linkedin.com/in/xxx",
-    github: "github.com/xxx",
+    name: "",
+    email: "",
+    phone: "",
+    location: "",
+    linkedin: "",
+    github: "",
     website: "",
     twitter: "",
     instagram: "",
@@ -40,158 +66,393 @@ export default function EditPortfolioPage() {
     googleScholar: "",
     dribbble: "",
     calendly: "",
-    // AI-Generated Summary
-    aiSummary:
-      "A passionate software developer with expertise in full-stack web development, machine learning, and cloud technologies. Proven track record of delivering high-quality solutions and leading cross-functional teams.",
-    // Enhanced Content
-    headline: "Full Stack Developer | ML Enthusiast | Open Source Contributor",
-    bio: "I'm a software engineer passionate about building products that make a difference. With 3+ years of experience in web development and machine learning, I love tackling complex problems and turning ideas into reality.",
-    // Skills
-    technicalSkills: [
-      "JavaScript",
-      "TypeScript",
-      "React",
-      "Next.js",
-      "Node.js",
-      "Python",
-      "TensorFlow",
-      "PostgreSQL",
-      "MongoDB",
-      "AWS",
-      "Docker",
-      "Git",
-    ],
-    softSkills: [
-      "Leadership",
-      "Communication",
-      "Problem Solving",
-      "Team Collaboration",
-      "Project Management",
-    ],
-    languages: ["English (Fluent)", "Hindi (Native)", "Assamese (Native)"],
+    aiSummary: "",
+    headline: "",
+    bio: "",
+    technicalSkills: [],
+    softSkills: [],
+    languages: [],
   });
 
-  const [workExperience, setWorkExperience] = useState([
-    {
-      id: 1,
-      title: "Software Developer",
-      company: "Tech Solutions Inc.",
-      location: "Remote",
-      startDate: "2023-01",
-      endDate: "Present",
-      current: true,
-      description:
-        "Developed and maintained full-stack web applications using React and Node.js. Led a team of 3 developers on key projects.",
-      achievements: [
-        "Increased application performance by 40%",
-        "Implemented CI/CD pipeline reducing deployment time by 60%",
-      ],
-    },
-    {
-      id: 2,
-      title: "Junior Developer",
-      company: "StartUp Labs",
-      location: "Bangalore, India",
-      startDate: "2021-06",
-      endDate: "2022-12",
-      current: false,
-      description:
-        "Built responsive web interfaces and RESTful APIs. Collaborated with design team to implement UI/UX improvements.",
-      achievements: [
-        "Developed 5+ client-facing features",
-        "Reduced bug count by 30% through automated testing",
-      ],
-    },
-  ]);
-
-  const [education, setEducation] = useState([
-    {
-      id: 1,
-      degree: "Bachelor of Technology",
-      field: "Computer Science & Engineering",
-      institution: "xyz uni",
-      location: "city, state",
-      startDate: "2019",
-      endDate: "2023",
-      gpa: "8.5/10",
-      achievements: ["Dean's List 2022", "Best Project Award"],
-    },
-  ]);
-
-  const [projects, setProjects] = useState([
-    {
-      id: 1,
-      name: "IntelliFolio",
-      description:
-        "AI-powered portfolio generator that creates personalized portfolio websites from resumes.",
-      technologies: ["Next.js", "FastAPI", "OpenAI", "Tailwind CSS"],
-      link: "https://github.com/koyelkalita/intellifolio",
-      demoLink: "https://intellifolio.demo.com",
-      startDate: "2024-01",
-      endDate: "Present",
-    },
-    {
-      id: 2,
-      name: "Smart Task Manager",
-      description:
-        "A productivity app with AI-powered task prioritization and scheduling.",
-      technologies: ["React Native", "Node.js", "MongoDB", "TensorFlow"],
-      link: "https://github.com/koyelkalita/smart-task",
-      demoLink: "",
-      startDate: "2023-06",
-      endDate: "2023-12",
-    },
-  ]);
-
-  const [publications, setPublications] = useState([
-    {
-      id: 1,
-      title: "Machine Learning Approaches for Resume Parsing",
-      journal: "International Journal of Computer Science",
-      authors: "name, Dr. A. Sharma",
-      year: "2023",
-      doi: "10.1234/ijcs.2023.001",
-      link: "",
-    },
-  ]);
-
-  const [awards, setAwards] = useState([
-    {
-      id: 1,
-      title: "Best Innovation Award",
-      organization: "Tech Summit 2023",
-      year: "2023",
-      description:
-        "Awarded for developing an innovative AI-based solution for automated resume screening.",
-    },
-    {
-      id: 2,
-      title: "Hackathon Winner",
-      organization: "CodeFest Northeast",
-      year: "2022",
-      description:
-        "First place in the 24-hour hackathon for building a real-time collaboration tool.",
-    },
-  ]);
+  const [workExperience, setWorkExperience] = useState([]);
+  const [education, setEducation] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [publications, setPublications] = useState([]);
+  const [awards, setAwards] = useState([]);
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const getInitials = (name) => {
+    if (!name) return "?";
     return name
       .split(" ")
+      .filter((n) => n.length > 0)
       .map((n) => n[0])
       .join("")
       .toUpperCase()
       .slice(0, 2);
   };
   const handleGenerate = async () => {
-    // This would update an existing portfolio
-    // Example: await updatePortfolio(portfolioId, { formData, workExperience, ... }, token);
-    console.log("Portfolio generation not yet implemented");
+    const result = await generatePortfolio({
+      formData,
+      workExperience,
+      education,
+      projects,
+      publications,
+      awards,
+    });
+
+    console.log(result);
   };
 
+  // ─── Load portfolio data from API ───
+  useEffect(() => {
+    async function loadPortfolioData() {
+      try {
+        if (!currentUser) {
+          setFetchError("Please sign in to edit your portfolio.");
+          setInitialLoading(false);
+          return;
+        }
+
+        const token = await currentUser.getIdToken();
+        const portfoliosRes = await getPortfolios(token);
+
+        if (
+          portfoliosRes.status !== "success" ||
+          !portfoliosRes.portfolios?.length
+        ) {
+          setFetchError(
+            "No portfolios found. Build a profile first from the dashboard.",
+          );
+          setInitialLoading(false);
+          return;
+        }
+
+        // Find portfolio matching URL slug, or find the best one with data
+        const params = new URLSearchParams(window.location.search);
+        const slug = params.get("portfolio");
+        let portfolio;
+        if (slug) {
+          portfolio = portfoliosRes.portfolios.find((p) => p.slug === slug);
+        }
+
+        // Sort by created_at descending (newest first)
+        const sorted = [...portfoliosRes.portfolios].sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at),
+        );
+
+        // If no slug match, find the first portfolio that has profile data
+        if (!portfolio) {
+          for (const candidate of sorted) {
+            const testProfile = await getPortfolioProfile(candidate.id);
+            if (testProfile) {
+              portfolio = candidate;
+              break;
+            }
+          }
+        }
+
+        if (!portfolio) {
+          setFetchError("No portfolio with data found. Build a profile first.");
+          setInitialLoading(false);
+          return;
+        }
+
+        const pId = portfolio.id;
+        setPortfolioId(pId);
+
+        // Fetch all data in parallel
+        const [profile, skills, projectsData, socialLinks, sections] =
+          await Promise.all([
+            getPortfolioProfile(pId),
+            getPortfolioSkills(pId),
+            getPortfolioProjects(pId),
+            getPortfolioSocialLinks(pId),
+            getPortfolioSections(pId),
+          ]);
+
+        // Map social links to a flat lookup
+        const socialMap = {};
+        for (const link of socialLinks || []) {
+          socialMap[link.platform] = link.url || "";
+        }
+
+        // Map skills by category
+        const technicalSkills = (skills || [])
+          .filter((s) => s.category === "technical")
+          .map((s) => s.skill_name);
+        const softSkills = (skills || [])
+          .filter((s) => s.category === "soft")
+          .map((s) => s.skill_name);
+        const languages = (skills || [])
+          .filter((s) => s.category === "language")
+          .map((s) => s.skill_name);
+
+        // Set form data from profile + social links + skills
+        setFormData({
+          name: profile?.name || "",
+          email: profile?.email || "",
+          phone: profile?.phone || "",
+          location: profile?.location || "",
+          linkedin: socialMap.linkedin || "",
+          github: socialMap.github || "",
+          website: socialMap.website || "",
+          twitter: socialMap.twitter || "",
+          instagram: socialMap.instagram || "",
+          facebook: socialMap.facebook || "",
+          youtube: socialMap.youtube || "",
+          googleScholar: socialMap.google_scholar || "",
+          dribbble: socialMap.dribbble || "",
+          calendly: socialMap.calendly || "",
+          aiSummary: profile?.summary || "",
+          headline: profile?.merged_data?.headline || "",
+          bio: profile?.merged_data?.bio || "",
+          technicalSkills,
+          softSkills,
+          languages,
+        });
+
+        // Map sections to respective state
+        for (const section of sections || []) {
+          const content = Array.isArray(section.content) ? section.content : [];
+          switch (section.section_type) {
+            case "experience":
+              setWorkExperience(
+                content.map((item, i) => {
+                  // Parse "duration" into startDate/endDate if needed
+                  let startDate = item.startDate || "";
+                  let endDate = item.endDate || "";
+                  let current = item.current || false;
+                  if (!startDate && item.duration) {
+                    const parts = item.duration.split(/\s*[-–]\s*/);
+                    startDate = parts[0]?.trim() || "";
+                    endDate = parts[1]?.trim() || "";
+                    if (endDate.toLowerCase() === "present") {
+                      current = true;
+                    }
+                  }
+                  return {
+                    ...item,
+                    id: item.id || i + 1,
+                    title: item.title || "",
+                    company: item.company || item.organization || "",
+                    location: item.location || "",
+                    startDate,
+                    endDate,
+                    current,
+                    description: Array.isArray(item.description)
+                      ? item.description.join(" ")
+                      : item.description || "",
+                    achievements: item.achievements || [],
+                  };
+                }),
+              );
+              break;
+            case "education":
+              setEducation(
+                content.map((item, i) => ({
+                  ...item,
+                  id: item.id || i + 1,
+                  degree: item.degree || "",
+                  field: item.field || "",
+                  institution: item.institution || item.school || "",
+                  location: item.location || "",
+                  startDate: item.startDate || "",
+                  endDate: item.endDate || "",
+                  gpa: item.gpa || "",
+                  achievements: item.achievements || [],
+                })),
+              );
+              break;
+            case "publications":
+              setPublications(
+                content.map((item, i) => ({
+                  ...item,
+                  id: item.id || i + 1,
+                  achievements: item.achievements || [],
+                })),
+              );
+              break;
+            case "awards":
+              setAwards(
+                content.map((item, i) => ({
+                  ...item,
+                  id: item.id || i + 1,
+                  achievements: item.achievements || [],
+                })),
+              );
+              break;
+          }
+        }
+
+        // Map projects
+        if (projectsData?.length) {
+          setProjects(
+            projectsData.map((p) => ({
+              id: p.id,
+              name: p.name || "",
+              description: p.description || "",
+              technologies: p.technologies || [],
+              link: p.url || "",
+              demoLink: p.github_url || "",
+              startDate: p.start_date || "",
+              endDate: p.end_date || "Present",
+            })),
+          );
+        }
+
+        // Store existing IDs for save operations
+        setExistingIds({
+          skills: (skills || []).map((s) => s.id),
+          socialLinks: (socialLinks || []).map((l) => l.id),
+          projects: (projectsData || []).map((p) => p.id),
+          sections: Object.fromEntries(
+            (sections || []).map((s) => [s.section_type, s.id]),
+          ),
+        });
+      } catch (err) {
+        console.error("Failed to load portfolio data:", err);
+        setFetchError("Failed to load portfolio data. Please try again.");
+      } finally {
+        setInitialLoading(false);
+      }
+    }
+
+    loadPortfolioData();
+  }, [currentUser]);
+
+  // ─── Save all portfolio data ───
+  const handleSave = async () => {
+    if (!portfolioId) return;
+    setSaving(true);
+
+    try {
+      // 1. Save profile data (upsert)
+      await saveProfileData(portfolioId, {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        location: formData.location,
+        summary: formData.aiSummary,
+        merged_data: {
+          headline: formData.headline,
+          bio: formData.bio,
+        },
+      });
+
+      // 2. Replace skills: delete old, bulk create new
+      for (const id of existingIds.skills) {
+        await deleteSkill(id);
+      }
+      const allSkills = [
+        ...formData.technicalSkills.map((name) => ({
+          skill_name: name,
+          category: "technical",
+        })),
+        ...formData.softSkills.map((name) => ({
+          skill_name: name,
+          category: "soft",
+        })),
+        ...formData.languages.map((name) => ({
+          skill_name: name,
+          category: "language",
+        })),
+      ];
+      const newSkills = await bulkCreateSkills(portfolioId, allSkills);
+      setExistingIds((prev) => ({
+        ...prev,
+        skills: (newSkills || []).map((s) => s.id),
+      }));
+
+      // 3. Replace social links: delete old, bulk create new
+      for (const id of existingIds.socialLinks) {
+        await deleteSocialLink(id);
+      }
+      const socialLinksData = [];
+      const socialFieldMap = {
+        linkedin: "linkedin",
+        github: "github",
+        website: "website",
+        twitter: "twitter",
+        instagram: "instagram",
+        facebook: "facebook",
+        youtube: "youtube",
+        googleScholar: "google_scholar",
+        dribbble: "dribbble",
+        calendly: "calendly",
+      };
+      for (const [field, platform] of Object.entries(socialFieldMap)) {
+        if (formData[field]) {
+          socialLinksData.push({ platform, url: formData[field] });
+        }
+      }
+      const newLinks = await bulkCreateSocialLinks(
+        portfolioId,
+        socialLinksData,
+      );
+      setExistingIds((prev) => ({
+        ...prev,
+        socialLinks: (newLinks || []).map((l) => l.id),
+      }));
+
+      // 4. Save sections (experience, education, publications, awards)
+      const sectionMap = {
+        experience: workExperience,
+        education: education,
+        publications: publications,
+        awards: awards,
+      };
+      const newSectionIds = { ...existingIds.sections };
+      for (const [sectionType, content] of Object.entries(sectionMap)) {
+        const existingSectionId = existingIds.sections[sectionType];
+        // Strip client-side ids from content before saving
+        const cleanContent = content.map(({ id, ...rest }) => rest);
+        if (existingSectionId) {
+          await updateSection(existingSectionId, {
+            content: cleanContent,
+          });
+        } else if (cleanContent.length > 0) {
+          const newSection = await createSection(portfolioId, {
+            section_type: sectionType,
+            content: cleanContent,
+            order_index: Object.keys(sectionMap).indexOf(sectionType),
+          });
+          newSectionIds[sectionType] = newSection.id;
+        }
+      }
+      setExistingIds((prev) => ({ ...prev, sections: newSectionIds }));
+
+      // 5. Replace projects: delete old, create new
+      for (const id of existingIds.projects) {
+        await deleteProject(id);
+      }
+      const newProjectIds = [];
+      for (const project of projects) {
+        const result = await createProject(portfolioId, {
+          name: project.name,
+          description: project.description,
+          url: project.link,
+          github_url: project.demoLink,
+          technologies: project.technologies,
+          start_date: project.startDate || null,
+          end_date:
+            project.endDate === "Present" ? null : project.endDate || null,
+        });
+        newProjectIds.push(result.id);
+      }
+      setExistingIds((prev) => ({ ...prev, projects: newProjectIds }));
+
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Failed to save:", err);
+      alert("Failed to save changes. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const getSectionIcon = (section) => {
     switch (section) {
@@ -881,7 +1142,7 @@ export default function EditPortfolioPage() {
             )}
           </div>
           <p className="text-gray-700 mb-3">{exp.description}</p>
-          {exp.achievements.length > 0 && (
+          {exp.achievements && exp.achievements.length > 0 && (
             <div>
               <p className="text-sm font-medium text-gray-700 mb-2">
                 Key Achievements:
@@ -918,61 +1179,64 @@ export default function EditPortfolioPage() {
 
   const renderEducation = () => (
     <div className="space-y-6">
-      {education.map((edu, index) => (
-        <div
-          key={edu.id}
-          className="border border-gray-200 rounded-lg p-5 bg-gray-50/50"
-        >
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <h4 className="font-semibold text-gray-900">
-                {edu.degree} in {edu.field}
-              </h4>
-              <p className="text-gray-600">{edu.institution}</p>
-              <p className="text-sm text-gray-500">
-                {edu.location} • {edu.startDate} - {edu.endDate}
-              </p>
-              {edu.gpa && (
-                <p className="text-sm text-gray-500">GPA: {edu.gpa}</p>
+      {education.map((edu, index) => {
+        console.log("education: ", edu);
+        return (
+          <div
+            key={edu.id}
+            className="border border-gray-200 rounded-lg p-5 bg-gray-50/50"
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h4 className="font-semibold text-gray-900">
+                  {edu.degree} in {edu.field}
+                </h4>
+                <p className="text-gray-600">{edu.institution}</p>
+                <p className="text-sm text-gray-500">
+                  {edu.location} • {edu.startDate} - {edu.endDate}
+                </p>
+                {edu.gpa && (
+                  <p className="text-sm text-gray-500">GPA: {edu.gpa}</p>
+                )}
+              </div>
+              {isEditing && (
+                <button
+                  onClick={() =>
+                    setEducation(education.filter((_, i) => i !== index))
+                  }
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                </button>
               )}
             </div>
-            {isEditing && (
-              <button
-                onClick={() =>
-                  setEducation(education.filter((_, i) => i !== index))
-                }
-                className="text-red-500 hover:text-red-700"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
-              </button>
+            {edu.achievements && edu.achievements.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {edu.achievements.map((achievement, i) => (
+                  <span
+                    key={i}
+                    className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-sm"
+                  >
+                    {achievement}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
-          {edu.achievements && edu.achievements.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {edu.achievements.map((achievement, i) => (
-                <span
-                  key={i}
-                  className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-sm"
-                >
-                  {achievement}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
+        );
+      })}
       {isEditing && (
         <button className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center gap-2">
           <svg
@@ -1292,7 +1556,6 @@ export default function EditPortfolioPage() {
     }
   };
 
-
   return (
     <div className="min-h-screen bg-[#f5f0eb] flex">
       {/* Sidebar */}
@@ -1309,106 +1572,132 @@ export default function EditPortfolioPage() {
 
         {/* Content Area */}
         <div className="flex-1 px-8 py-6 overflow-auto">
-          {/* Status Bar */}
-          <div className="flex items-center justify-between mb-6 bg-white rounded-lg border border-gray-200 px-4 py-3">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-gray-800 rounded-full"></span>
-              <span className="text-sm text-gray-600">✓ Ready to edit</span>
+          {initialLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading portfolio data...</p>
+              </div>
             </div>
-            <button
-              onClick={() => setIsEditing(!isEditing)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isEditing
-                  ? "bg-gray-600 text-white hover:bg-gray-700"
-                  : "bg-green-600 text-white hover:bg-green-700"
-              }`}
-            >
-              {isEditing ? "Save Data" : "✏ Edit Data"}
-            </button>
-          </div>
-
-          {/* Section Card */}
-          <div className="bg-white rounded-lg border border-gray-200">
-            {/* Section Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center gap-3">
-                <span className="text-gray-600">
-                  {getSectionIcon(sections[currentSection])}
-                </span>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  {sections[currentSection]}
-                </h2>
+          ) : fetchError ? (
+            <div className="flex flex-col items-center justify-center h-64 gap-4">
+              <p className="text-red-600 font-medium">{fetchError}</p>
+              <Link
+                href="/dashboard"
+                className="text-sm text-gray-600 underline hover:text-gray-800"
+              >
+                Back to Dashboard
+              </Link>
+            </div>
+          ) : (
+            <>
+              {/* Status Bar */}
+              <div className="flex items-center justify-between mb-6 bg-white rounded-lg border border-gray-200 px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-gray-800 rounded-full"></span>
+                  <span className="text-sm text-gray-600">✓ Ready to edit</span>
+                </div>
+                <button
+                  onClick={isEditing ? handleSave : () => setIsEditing(true)}
+                  disabled={saving}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    isEditing
+                      ? "bg-gray-600 text-white hover:bg-gray-700"
+                      : "bg-green-600 text-white hover:bg-green-700"
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  {saving
+                    ? "Saving..."
+                    : isEditing
+                      ? "Save Data"
+                      : "✏ Edit Data"}
+                </button>
               </div>
 
-              {/* Section Dots */}
-              <div className="flex items-center gap-2">
-                {sections.map((_, index) => (
+              {/* Section Card */}
+              <div className="bg-white rounded-lg border border-gray-200">
+                {/* Section Header */}
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <span className="text-gray-600">
+                      {getSectionIcon(sections[currentSection])}
+                    </span>
+                    <h2 className="text-lg font-semibold text-gray-900">
+                      {sections[currentSection]}
+                    </h2>
+                  </div>
+
+                  {/* Section Dots */}
+                  <div className="flex items-center gap-2">
+                    {sections.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentSection(index)}
+                        className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                          index === currentSection
+                            ? "bg-gray-800"
+                            : "bg-gray-300 hover:bg-gray-400"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Navigation */}
+                <div className="flex items-center justify-between px-6 py-3 border-b border-gray-100">
                   <button
-                    key={index}
-                    onClick={() => setCurrentSection(index)}
-                    className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                      index === currentSection
-                        ? "bg-gray-800"
-                        : "bg-gray-300 hover:bg-gray-400"
-                    }`}
-                  />
-                ))}
+                    onClick={() =>
+                      setCurrentSection(Math.max(0, currentSection - 1))
+                    }
+                    disabled={currentSection === 0}
+                    className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 19l-7-7 7-7"
+                      />
+                    </svg>
+                    Previous
+                  </button>
+                  <button
+                    onClick={() =>
+                      setCurrentSection(
+                        Math.min(sections.length - 1, currentSection + 1),
+                      )
+                    }
+                    disabled={currentSection === sections.length - 1}
+                    className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Section Content */}
+                <div className="p-6">{renderSectionContent()}</div>
               </div>
-            </div>
-
-            {/* Navigation */}
-            <div className="flex items-center justify-between px-6 py-3 border-b border-gray-100">
-              <button
-                onClick={() =>
-                  setCurrentSection(Math.max(0, currentSection - 1))
-                }
-                disabled={currentSection === 0}
-                className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-                Previous
-              </button>
-              <button
-                onClick={() =>
-                  setCurrentSection(
-                    Math.min(sections.length - 1, currentSection + 1),
-                  )
-                }
-                disabled={currentSection === sections.length - 1}
-                className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Next
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            {/* Section Content */}
-            <div className="p-6">{renderSectionContent()}</div>
-          </div>
+            </>
+          )}
         </div>
 
         {/* Footer */}
@@ -1417,8 +1706,7 @@ export default function EditPortfolioPage() {
             <button
               onClick={handleGenerate}
               className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
->
-
+            >
               <svg
                 className="w-5 h-5"
                 fill="none"
@@ -1432,7 +1720,7 @@ export default function EditPortfolioPage() {
                   d="M13 10V3L4 14h7v7l9-11h-7z"
                 />
               </svg>
-             {loading ? "Generating..." : "Create Portfolio Site →"}
+              {loading ? "Generating..." : "Create Portfolio Site →"}
             </button>
           </div>
         </footer>
