@@ -9,7 +9,6 @@ const navigationItems = [
   { name: "Edit Portfolio", href: "/dashboard/edit", icon: "edit" },
   { name: "Change Template", href: "/dashboard/templates", icon: "template" },
   { name: "Change Domain", href: "/dashboard/domain", icon: "settings" },
-  { name: "Preview Portfolio", href: "/dashboard/preview", icon: "eye" },
 ];
 
 const getIcon = (type) => {
