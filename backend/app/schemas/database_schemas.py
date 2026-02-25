@@ -3,7 +3,7 @@ Pydantic schemas for database models - used for API validation
 """
 
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional, List
+from typing import Any, Optional, List
 from datetime import datetime
 from uuid import UUID
 
@@ -226,14 +226,14 @@ class SocialLinkResponse(BaseModel):
 
 class PortfolioSectionCreate(BaseModel):
     section_type: str
-    content: dict
+    content: Any
     order_index: int = 0
     is_visible: bool = True
 
 
 class PortfolioSectionUpdate(BaseModel):
     section_type: Optional[str] = None
-    content: Optional[dict] = None
+    content: Optional[Any] = None
     order_index: Optional[int] = None
     is_visible: Optional[bool] = None
 
@@ -242,7 +242,7 @@ class PortfolioSectionResponse(BaseModel):
     id: UUID
     portfolio_id: UUID
     section_type: str
-    content: dict
+    content: Any
     order_index: int
     is_visible: bool
     updated_at: datetime
