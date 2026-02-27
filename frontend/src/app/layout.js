@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { PortfolioProvider } from "@/contexts/PortfolioContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,7 +31,9 @@ export default function RootLayout({ children }) {
         className={`${inter.variable} font-[family-name:var(--font-inter)] antialiased`}
       >
         <AuthProvider>
-          {children}
+          <PortfolioProvider>
+            {children}
+          </PortfolioProvider>
         </AuthProvider>
       </body>
     </html>

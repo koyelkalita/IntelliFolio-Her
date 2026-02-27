@@ -10,3 +10,5 @@ alembic
 cryptography
 email-validator
 google-genai
+firebase-admin
+python-multipart
