@@ -118,432 +118,455 @@ export default function DashboardPage() {
       <DashboardLayout>
         {/* Main Content */}
         <div className="flex-1 p-8">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Welcome back, {userName}
-            </h1>
-            <p className="text-gray-500 mt-1">Your Portfolio Control Center</p>
+          {/* Header */}
+          <div className="flex items-start justify-between mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Welcome back, {userName}
+              </h1>
+              <p className="text-gray-500 mt-1">
+                Your Portfolio Control Center
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <a
+                href="/dashboard/create"
+                className="px-6 py-2 bg-stone-800 text-white rounded-lg hover:bg-stone-900 transition-colors font-medium"
+              >
+                + Create Portfolio
+              </a>
+              <SignOutButton />
+            </div>
           </div>
-          <div className="flex gap-3">
-            <a
-              href="/dashboard/create"
-              className="px-6 py-2 bg-stone-800 text-white rounded-lg hover:bg-stone-900 transition-colors font-medium"
-            >
-              + Create Portfolio
-            </a>
-            <SignOutButton />
-          </div>
-        </div>
 
-        {/* Your Portfolios Section */}
-        {portfolios.length > 0 && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Your Portfolios</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {portfolios.map((portfolio) => (
-                <div
-                  key={portfolio.id}
-                  className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="font-semibold text-lg text-gray-900 flex-1">
-                      {portfolio.title}
-                    </h3>
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        portfolio.status === "published"
-                          ? "bg-amber-100 text-amber-700"
-                          : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {portfolio.status === "published" ? "Published" : "Draft"}
-                    </span>
-                  </div>
-
-                  <p className="text-sm text-gray-500 mb-4">
-                    Created {new Date(portfolio.created_at).toLocaleDateString()}
-                  </p>
-
-                  <div className="flex flex-col gap-2">
-                    <div className="flex gap-2">
-                      <Link
-                        href={`/dashboard/edit?portfolio=${portfolio.slug}`}
-                        className="flex-1 px-4 py-2 text-sm font-medium text-center text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                      >
-                        Edit
-                      </Link>
-                      <a
-                        href={`/${portfolio.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 px-4 py-2 text-sm font-medium text-center text-white bg-stone-800 hover:bg-stone-900 rounded-lg transition-colors"
-                      >
-                        View
-                      </a>
-                    </div>
-                    {portfolio.status !== "published" && (
-                      <button
-                        onClick={async () => {
-                          try {
-                            if (!currentUser) return;
-                            const token = await currentUser.getIdToken();
-                            const response = await fetch(
-                              `http://localhost:8000/portfolios/${portfolio.id}/publish`,
-                              {
-                                method: "POST",
-                                headers: { Authorization: `Bearer ${token}` },
-                              }
-                            );
-                            if (response.ok) {
-                              // Refresh portfolios
-                              const result = await getPortfolios(token);
-                              if (result.status === "success") {
-                                setPortfolios(result.portfolios || []);
-                              }
-                            }
-                          } catch (error) {
-                            console.error("Publish error:", error);
-                          }
-                        }}
-                        className="w-full px-4 py-2 text-sm font-medium text-center text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-                      >
-                        Publish
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {portfolios.length === 0 && !loadingPortfolios && (
-          <section className="mb-8 p-8 bg-blue-50 rounded-xl border border-blue-200">
-            <h3 className="font-semibold text-lg text-blue-900 mb-2">No Portfolios Yet</h3>
-            <p className="text-blue-800 mb-4">Create your first portfolio to get started!</p>
-            <Link
-              href="/dashboard/create"
-              className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-            >
-              Create Your First Portfolio
-            </Link>
-          </section>
-        )}
-
-        {/* Top Row - 3 Cards */}
-        <section className="mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Card 1: Portfolio Status */}
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <svg
-                  className="w-5 h-5 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                <h3 className="font-semibold text-gray-900">
-                  Portfolio Status
-                </h3>
-              </div>
-
-              <div className="space-y-3 mb-5">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-500">Status:</span>
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      portfolioData.status === "Live"
-                        ? "bg-amber-100 text-amber-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}
-                  >
-                    {portfolioData.status}
-                  </span>
-                </div>
-
-                {portfolioData.liveUrl && (
-                  <div className="flex items-start gap-2">
-                    <span className="text-sm text-gray-500">Live URL:</span>
-                    <a
-                      href={portfolioData.liveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-amber-800 hover:underline break-all"
-                    >
-                      {portfolioData.liveUrl}
-                    </a>
-                  </div>
-                )}
-
-                <div className="flex items-start gap-2">
-                  <span className="text-sm text-gray-500">Last updated:</span>
-                  <span className="text-sm text-gray-700">
-                    {portfolioData.lastUpdated}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <button className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                  Preview
-                </button>
-                <button className="flex-1 px-4 py-2 text-sm font-medium text-white bg-stone-800 hover:bg-stone-900 rounded-lg transition-colors">
-                  Republish
-                </button>
-              </div>
-            </div>
-
-            {/* Card 2: Portfolio Strength Score */}
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <svg
-                  className="w-5 h-5 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                  />
-                </svg>
-                <h3 className="font-semibold text-gray-900">
-                  Portfolio Strength
-                </h3>
-              </div>
-
-              <div className="text-center mb-4">
-                <span
-                  className={`text-4xl font-bold ${getScoreColor(portfolioScore)}`}
-                >
-                  {portfolioScore}
-                </span>
-                <span className="text-lg text-gray-400"> / 100</span>
-              </div>
-
-              {/* Progress Bar */}
-              <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-                <div
-                  className={`h-2 rounded-full ${getProgressColor(portfolioScore)}`}
-                  style={{ width: `${portfolioScore}%` }}
-                ></div>
-              </div>
-
-              {/* Checklist */}
-              <div className="space-y-2">
-                {checklistItems.map((item, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    {item.completed ? (
-                      <svg
-                        className="w-4 h-4 text-amber-500 shrink-0"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    ) : (
-                      <svg
-                        className="w-4 h-4 text-gray-800 shrink-0"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    )}
-                    <span
-                      className={`text-xs ${
-                        item.completed ? "text-gray-600" : "text-gray-500"
-                      }`}
-                    >
-                      {item.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Card 3: AI Suggestions */}
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <svg
-                  className="w-5 h-5 text-amber-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                  />
-                </svg>
-                <h3 className="font-semibold text-gray-900">AI Suggestions</h3>
-              </div>
-
-              <div className="space-y-3">
-                {aiSuggestions.map((suggestion, index) => (
+          {/* Your Portfolios Section */}
+          {portfolios.length > 0 && (
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                Your Portfolios
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {portfolios.map((portfolio) => (
                   <div
-                    key={index}
-                    className="flex items-start gap-3 p-3 bg-amber-50 border-l-4 border-amber-600 rounded-r-lg"
+                    key={portfolio.id}
+                    className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
                   >
-                    <span className="text-lg shrink-0">{suggestion.icon}</span>
-                    <p className="text-sm text-gray-700">{suggestion.text}</p>
+                    <div className="flex items-start justify-between mb-3">
+                      <h3 className="font-semibold text-lg text-gray-900 flex-1">
+                        {portfolio.title}
+                      </h3>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          portfolio.status === "published"
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {portfolio.status === "published"
+                          ? "Published"
+                          : "Draft"}
+                      </span>
+                    </div>
+
+                    <p className="text-sm text-gray-500 mb-4">
+                      Created{" "}
+                      {new Date(portfolio.created_at).toLocaleDateString()}
+                    </p>
+
+                    <div className="flex flex-col gap-2">
+                      <div className="flex gap-2">
+                        <Link
+                          href={`/dashboard/edit?portfolio=${portfolio.slug}`}
+                          className="flex-1 px-4 py-2 text-sm font-medium text-center text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                        >
+                          Edit
+                        </Link>
+                        <a
+                          href={`/${portfolio.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 px-4 py-2 text-sm font-medium text-center text-white bg-stone-800 hover:bg-stone-900 rounded-lg transition-colors"
+                        >
+                          View
+                        </a>
+                      </div>
+                      {portfolio.status !== "published" && (
+                        <button
+                          onClick={async () => {
+                            try {
+                              if (!currentUser) return;
+                              const token = await currentUser.getIdToken();
+                              const response = await fetch(
+                                `http://localhost:8000/portfolios/${portfolio.id}/publish`,
+                                {
+                                  method: "POST",
+                                  headers: { Authorization: `Bearer ${token}` },
+                                },
+                              );
+                              if (response.ok) {
+                                // Refresh portfolios
+                                const result = await getPortfolios(token);
+                                if (result.status === "success") {
+                                  setPortfolios(result.portfolios || []);
+                                }
+                              }
+                            } catch (error) {
+                              console.error("Publish error:", error);
+                            }
+                          }}
+                          className="w-full px-4 py-2 text-sm font-medium text-center text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                        >
+                          Publish
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-        </section>
+            </section>
+          )}
 
-        {/* Resume Status Card */}
-        <section className="mb-8">
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <svg
-                  className="w-5 h-5 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                <h3 className="font-semibold text-gray-900">
-                  Resume Processing
-                </h3>
-              </div>
-              <button className="px-4 py-2 text-sm font-medium text-white bg-stone-800 hover:bg-stone-900 rounded-lg transition-colors">
-                Reprocess Resume
-              </button>
-            </div>
+          {portfolios.length === 0 && !loadingPortfolios && (
+            <section className="mb-8 p-8 bg-blue-50 rounded-xl border border-blue-200">
+              <h3 className="font-semibold text-lg text-blue-900 mb-2">
+                No Portfolios Yet
+              </h3>
+              <p className="text-blue-800 mb-4">
+                Create your first portfolio to get started!
+              </p>
+              <Link
+                href="/dashboard/create"
+                className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
+                Create Your First Portfolio
+              </Link>
+            </section>
+          )}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-4">
-              {/* Resume Uploaded */}
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    resumeData.uploaded ? "bg-amber-100" : "bg-gray-100"
-                  }`}
-                >
-                  {resumeData.uploaded ? (
+          {/* Top Row - 3 Cards (only show when user has portfolios) */}
+          {portfolios.length > 0 && (
+            <section className="mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Card 1: Portfolio Status */}
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <svg
+                      className="w-5 h-5 text-gray-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    <h3 className="font-semibold text-gray-900">
+                      Portfolio Status
+                    </h3>
+                  </div>
+
+                  <div className="space-y-3 mb-5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-500">Status:</span>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          portfolioData.status === "Live"
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
+                        {portfolioData.status}
+                      </span>
+                    </div>
+
+                    {portfolioData.liveUrl && (
+                      <div className="flex items-start gap-2">
+                        <span className="text-sm text-gray-500">Live URL:</span>
+                        <a
+                          href={portfolioData.liveUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-amber-800 hover:underline break-all"
+                        >
+                          {portfolioData.liveUrl}
+                        </a>
+                      </div>
+                    )}
+
+                    <div className="flex items-start gap-2">
+                      <span className="text-sm text-gray-500">
+                        Last updated:
+                      </span>
+                      <span className="text-sm text-gray-700">
+                        {portfolioData.lastUpdated}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                      Preview
+                    </button>
+                    <button className="flex-1 px-4 py-2 text-sm font-medium text-white bg-stone-800 hover:bg-stone-900 rounded-lg transition-colors">
+                      Republish
+                    </button>
+                  </div>
+                </div>
+
+                {/* Card 2: Portfolio Strength Score */}
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <svg
+                      className="w-5 h-5 text-gray-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                      />
+                    </svg>
+                    <h3 className="font-semibold text-gray-900">
+                      Portfolio Strength
+                    </h3>
+                  </div>
+
+                  <div className="text-center mb-4">
+                    <span
+                      className={`text-4xl font-bold ${getScoreColor(portfolioScore)}`}
+                    >
+                      {portfolioScore}
+                    </span>
+                    <span className="text-lg text-gray-400"> / 100</span>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+                    <div
+                      className={`h-2 rounded-full ${getProgressColor(portfolioScore)}`}
+                      style={{ width: `${portfolioScore}%` }}
+                    ></div>
+                  </div>
+
+                  {/* Checklist */}
+                  <div className="space-y-2">
+                    {checklistItems.map((item, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        {item.completed ? (
+                          <svg
+                            className="w-4 h-4 text-amber-500 shrink-0"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        ) : (
+                          <svg
+                            className="w-4 h-4 text-gray-800 shrink-0"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        )}
+                        <span
+                          className={`text-xs ${
+                            item.completed ? "text-gray-600" : "text-gray-500"
+                          }`}
+                        >
+                          {item.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Card 3: AI Suggestions */}
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                  <div className="flex items-center gap-2 mb-4">
                     <svg
                       className="w-5 h-5 text-amber-600"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                     >
                       <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
                       />
                     </svg>
-                  ) : (
-                    <svg
-                      className="w-5 h-5 text-gray-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  )}
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Resume uploaded</p>
-                  <p className="font-medium text-gray-900">
-                    {resumeData.uploaded ? "Yes" : "No"}
-                  </p>
-                </div>
-              </div>
+                    <h3 className="font-semibold text-gray-900">
+                      AI Suggestions
+                    </h3>
+                  </div>
 
-              {/* Sections Detected */}
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
-                  <svg
-                    className="w-5 h-5 text-amber-700"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 10h16M4 14h16M4 18h16"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Sections detected</p>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {resumeData.sectionsDetected.map((section, index) => (
-                      <span
+                  <div className="space-y-3">
+                    {aiSuggestions.map((suggestion, index) => (
+                      <div
                         key={index}
-                        className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full"
+                        className="flex items-start gap-3 p-3 bg-amber-50 border-l-4 border-amber-600 rounded-r-lg"
                       >
-                        {section}
-                      </span>
+                        <span className="text-lg shrink-0">
+                          {suggestion.icon}
+                        </span>
+                        <p className="text-sm text-gray-700">
+                          {suggestion.text}
+                        </p>
+                      </div>
                     ))}
                   </div>
                 </div>
               </div>
+            </section>
+          )}
 
-              {/* Last Processed */}
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                  <svg
-                    className="w-5 h-5 text-gray-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+          {/* Resume Status Card*/}
+          {portfolios.length > 0 && (
+            <section className="mb-8">
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <svg
+                      className="w-5 h-5 text-gray-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    <h3 className="font-semibold text-gray-900">
+                      Resume Processing
+                    </h3>
+                  </div>
+                  <button className="px-4 py-2 text-sm font-medium text-white bg-stone-800 hover:bg-stone-900 rounded-lg transition-colors">
+                    Reprocess Resume
+                  </button>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500">Last processed</p>
-                  <p className="font-medium text-gray-900">
-                    {resumeData.lastProcessed}
-                  </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-4">
+                  {/* Resume Uploaded */}
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        resumeData.uploaded ? "bg-amber-100" : "bg-gray-100"
+                      }`}
+                    >
+                      {resumeData.uploaded ? (
+                        <svg
+                          className="w-5 h-5 text-amber-600"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      ) : (
+                        <svg
+                          className="w-5 h-5 text-gray-400"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Resume uploaded</p>
+                      <p className="font-medium text-gray-900">
+                        {resumeData.uploaded ? "Yes" : "No"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Sections Detected */}
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                      <svg
+                        className="w-5 h-5 text-amber-700"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Sections detected</p>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {resumeData.sectionsDetected.map((section, index) => (
+                          <span
+                            key={index}
+                            className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full"
+                          >
+                            {section}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Last Processed */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                      <svg
+                        className="w-5 h-5 text-gray-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Last processed</p>
+                      <p className="font-medium text-gray-900">
+                        {resumeData.lastProcessed}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
-      </div>
+            </section>
+          )}
+        </div>
       </DashboardLayout>
     </ProtectedRoute>
   );
