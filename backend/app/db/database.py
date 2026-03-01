@@ -5,19 +5,29 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Database URL
+# Database URL - defaults to SQLite if PostgreSQL is not available
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://postgres:postgres@localhost:5432/intellifolio"
+    "sqlite:///./intellifolio.db"
 )
 
-# Create engine
+# Create engine with appropriate settings
+connect_args = {}
+engine_kwargs = {
+    "echo": os.getenv("DEBUG", "false").lower() == "true",
+}
+
+if DATABASE_URL.startswith("sqlite"):
+    connect_args["check_same_thread"] = False
+else:
+    engine_kwargs["pool_pre_ping"] = True
+    engine_kwargs["pool_size"] = 10
+    engine_kwargs["max_overflow"] = 20
+
 engine = create_engine(
     DATABASE_URL,
-    echo=os.getenv("DEBUG", "false").lower() == "true",
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20,
+    connect_args=connect_args,
+    **engine_kwargs,
 )
 
 # Session factory
@@ -39,7 +49,7 @@ def get_db():
 def init_db():
     """Initialize database - create all tables"""
     Base.metadata.create_all(bind=engine)
-    print("✓ Database initialized successfully")
+    print("[OK] Database initialized successfully")
 
 
 def drop_db():
@@ -47,6 +57,6 @@ def drop_db():
     confirm = input("Are you sure you want to drop all tables? (yes/no): ")
     if confirm.lower() == "yes":
         Base.metadata.drop_all(bind=engine)
-        print("✓ All tables dropped")
+        print("[OK] All tables dropped")
     else:
         print("Cancelled")

@@ -20,15 +20,15 @@ export function BuildPortfolioForm({ templateType = "professional" }) {
   const { createPortfolio } = usePortfolio();
   const { currentUser } = useAuth();
 
-  // Redirect to dashboard after success
+  // Redirect to dashboard after success (full reload to ensure fresh data)
   useEffect(() => {
     if (success && portfolioSlug) {
       const timer = setTimeout(() => {
-        router.push("/dashboard");
-      }, 2000);
+        window.location.href = "/dashboard";
+      }, 500);
       return () => clearTimeout(timer);
     }
-  }, [success, portfolioSlug, router]);
+  }, [success, portfolioSlug]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -83,7 +83,7 @@ export function BuildPortfolioForm({ templateType = "professional" }) {
 
       // Check if response indicates success
       const isSuccess = result.status === "success" || result.portfolio_id || result.status !== "error";
-      
+
       if (!isSuccess || result.status === "error") {
         throw new Error(result.message || "Failed to build portfolio");
       }
@@ -144,7 +144,7 @@ export function BuildPortfolioForm({ templateType = "professional" }) {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Resume (PDF or Text)
           </label>
-          
+
           {/* File Upload */}
           <div className="mb-4">
             <label className="block p-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors">

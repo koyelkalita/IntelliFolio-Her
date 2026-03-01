@@ -1,16 +1,19 @@
-from sqlalchemy import Column, String, Integer, DateTime, Boolean, Text, ForeignKey, JSON, ARRAY, Date, func, Numeric
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, String, Integer, DateTime, Boolean, Text, ForeignKey, JSON, Date, func, Numeric
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import uuid
 from app.db.database import Base
 
 
+def generate_uuid():
+    return str(uuid.uuid4())
+
+
 class User(Base):
     """Users table - stores user profiles"""
     __tablename__ = "users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String(36), primary_key=True, default=generate_uuid)
     email = Column(String(255), unique=True, nullable=False, index=True)
     display_name = Column(String(255))
     avatar_url = Column(String(255))
@@ -27,8 +30,8 @@ class Portfolio(Base):
     """Portfolios table - generated portfolios per user"""
     __tablename__ = "portfolios"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     title = Column(String(255))
     slug = Column(String(255), unique=True, index=True)
     status = Column(String(50), default="draft")  # draft, published, archived
@@ -53,10 +56,10 @@ class ResumeData(Base):
     """Resume files and parsed data"""
     __tablename__ = "resume_data"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    portfolio_id = Column(UUID(as_uuid=True), ForeignKey("portfolios.id", ondelete="CASCADE"), nullable=False, index=True)
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    portfolio_id = Column(String(36), ForeignKey("portfolios.id", ondelete="CASCADE"), nullable=False, index=True)
     file_name = Column(String(255))
-    file_url = Column(String(255))  # S3 or storage URL
+    file_url = Column(String(255), nullable=True)  # S3 or storage URL (nullable for text uploads)
     parsed_json = Column(JSON)  # Entire parsed resume as JSON
     upload_date = Column(DateTime, default=datetime.utcnow)
 
@@ -68,8 +71,8 @@ class ProfileData(Base):
     """Merged profile data from resume + GitHub"""
     __tablename__ = "profile_data"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    portfolio_id = Column(UUID(as_uuid=True), ForeignKey("portfolios.id", ondelete="CASCADE"), nullable=False, index=True)
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    portfolio_id = Column(String(36), ForeignKey("portfolios.id", ondelete="CASCADE"), nullable=False, index=True)
     name = Column(String(255))
     email = Column(String(255))
     phone = Column(String(20))
@@ -89,8 +92,8 @@ class PortfolioSection(Base):
     """Individual portfolio sections (about, experience, etc)"""
     __tablename__ = "portfolio_sections"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    portfolio_id = Column(UUID(as_uuid=True), ForeignKey("portfolios.id", ondelete="CASCADE"), nullable=False, index=True)
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    portfolio_id = Column(String(36), ForeignKey("portfolios.id", ondelete="CASCADE"), nullable=False, index=True)
     section_type = Column(String(50), nullable=False)  # about, experience, projects, skills, education, social
     content = Column(JSON)  # Flexible structure
     order_index = Column(Integer, default=0)
@@ -105,13 +108,13 @@ class Project(Base):
     """Projects extracted from resume and GitHub"""
     __tablename__ = "projects"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    portfolio_id = Column(UUID(as_uuid=True), ForeignKey("portfolios.id", ondelete="CASCADE"), nullable=False, index=True)
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    portfolio_id = Column(String(36), ForeignKey("portfolios.id", ondelete="CASCADE"), nullable=False, index=True)
     name = Column(String(255), nullable=False)
     description = Column(Text)
     url = Column(String(255))
     github_url = Column(String(255))
-    technologies = Column(ARRAY(String), default=[])  # Array of tech stacks
+    technologies = Column(JSON, default=[])  # Array of tech stacks (stored as JSON)
     start_date = Column(Date)
     end_date = Column(Date)
     is_featured = Column(Boolean, default=False)
@@ -125,8 +128,8 @@ class Skill(Base):
     """Technical and soft skills"""
     __tablename__ = "skills"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    portfolio_id = Column(UUID(as_uuid=True), ForeignKey("portfolios.id", ondelete="CASCADE"), nullable=False, index=True)
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    portfolio_id = Column(String(36), ForeignKey("portfolios.id", ondelete="CASCADE"), nullable=False, index=True)
     skill_name = Column(String(100), nullable=False)
     category = Column(String(50))  # technical, soft, language
     proficiency_level = Column(String(50))  # beginner, intermediate, advanced, expert
@@ -141,8 +144,8 @@ class SocialLink(Base):
     """Social media and external links"""
     __tablename__ = "social_links"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    portfolio_id = Column(UUID(as_uuid=True), ForeignKey("portfolios.id", ondelete="CASCADE"), nullable=False, index=True)
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    portfolio_id = Column(String(36), ForeignKey("portfolios.id", ondelete="CASCADE"), nullable=False, index=True)
     platform = Column(String(50), nullable=False)  # github, linkedin, twitter, website, etc
     url = Column(String(255), nullable=False)
     username = Column(String(255))
@@ -156,8 +159,8 @@ class APICredential(Base):
     """Stored API credentials (encrypted)"""
     __tablename__ = "api_credentials"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     service = Column(String(50), nullable=False)  # github, etc
     token = Column(String(500), nullable=False)  # Store encrypted
     username = Column(String(255))
@@ -172,11 +175,11 @@ class PortfolioVersion(Base):
     """Portfolio version history for rollback"""
     __tablename__ = "portfolio_versions"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    portfolio_id = Column(UUID(as_uuid=True), ForeignKey("portfolios.id", ondelete="CASCADE"), nullable=False, index=True)
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    portfolio_id = Column(String(36), ForeignKey("portfolios.id", ondelete="CASCADE"), nullable=False, index=True)
     version_number = Column(Integer, nullable=False)
     data = Column(JSON)  # Entire portfolio snapshot
-    changed_by = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    changed_by = Column(String(36), ForeignKey("users.id"))
     change_description = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
 

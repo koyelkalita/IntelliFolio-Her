@@ -88,7 +88,11 @@ export async function saveProfileData(portfolioId, data) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Failed to save profile");
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error(`Save profile failed: ${res.status} ${res.statusText}`, errorText);
+    throw new Error(`Failed to save profile: ${res.status} ${res.statusText}`);
+  }
   return await res.json();
 }
 
@@ -103,7 +107,11 @@ export async function bulkCreateSkills(portfolioId, skills) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(skills),
   });
-  if (!res.ok) throw new Error("Failed to save skills");
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error(`Bulk create skills failed: ${res.status} ${res.statusText}`, errorText);
+    throw new Error(`Failed to save skills: ${res.status} ${res.statusText}`);
+  }
   return await res.json();
 }
 
@@ -118,7 +126,11 @@ export async function bulkCreateSocialLinks(portfolioId, links) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(links),
   });
-  if (!res.ok) throw new Error("Failed to save social links");
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error(`Bulk create social links failed: ${res.status} ${res.statusText}`, errorText);
+    throw new Error(`Failed to save social links: ${res.status} ${res.statusText}`);
+  }
   return await res.json();
 }
 
@@ -305,6 +317,33 @@ export async function updatePortfolio(portfolioId, updates, firebaseToken) {
 export async function publishPortfolio(portfolioId, firebaseToken) {
   return apiCall(`/portfolios/${portfolioId}/publish`, {
     method: "POST",
+    headers: {
+      Authorization: `Bearer ${firebaseToken}`,
+    },
+  });
+}
+
+
+
+/**
+ * Get AI Analysis and suggestions for a portfolio
+ */
+export async function getPortfolioAnalysis(portfolioId, firebaseToken) {
+  return apiCall(`/ai/analyze-portfolio/${portfolioId}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${firebaseToken}`,
+    },
+  });
+}
+
+/**
+ * Get AI analysis and suggestions for raw resume text (no portfolio yet)
+ */
+export async function getResumeAnalysis(resumeText, firebaseToken) {
+  return apiCall("/ai/analyze-resume", {
+    method: "POST",
+    body: JSON.stringify({ resume_text: resumeText }),
     headers: {
       Authorization: `Bearer ${firebaseToken}`,
     },

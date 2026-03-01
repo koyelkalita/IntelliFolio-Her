@@ -24,9 +24,9 @@ def main():
     # Check database connection
     try:
         with engine.connect() as conn:
-            print("✓ Database connection successful")
+            print("[OK] Database connection successful")
     except Exception as e:
-        print(f"✗ Database connection failed: {e}")
+        print(f"[FAIL] Database connection failed: {e}")
         print("\nMake sure:")
         print("1. PostgreSQL is running")
         print("2. DATABASE_URL is correct in .env")
@@ -36,7 +36,7 @@ def main():
     # Initialize tables
     try:
         init_db()
-        print("\n✓ All tables created successfully!")
+        print("\n[OK] All tables created successfully!")
         print("\nTables created:")
         print("  - users")
         print("  - portfolios")
@@ -49,7 +49,7 @@ def main():
         print("  - api_credentials")
         print("  - portfolio_versions")
     except Exception as e:
-        print(f"✗ Error creating tables: {e}")
+        print(f"[FAIL] Error creating tables: {e}")
         sys.exit(1)
 
     print("\n" + "=" * 60)

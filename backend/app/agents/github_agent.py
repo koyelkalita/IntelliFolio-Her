@@ -17,7 +17,14 @@ def summarize_github_profile(username: str) -> dict:
     repos = fetch_user_repos(username)
 
     if not repos:
-        raise HTTPException(status_code=404, detail="No repositories found for this user")
+        # No repos — return profile data without projects instead of crashing
+        return {
+            "name": profile_data.get("name", username),
+            "summary": profile_readme[:200] if profile_readme else "",
+            "social": {"github": f"https://github.com/{username}"},
+            "technicalSkills": [],
+            "projects": [],
+        }
 
     # Prepare detailed repo information for better project extraction
     repo_details = []

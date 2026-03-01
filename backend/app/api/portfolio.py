@@ -97,7 +97,9 @@ async def get_public_portfolio(
         }
         
         if profile_data:
-            # Build skills by category
+            merged = profile_data.merged_data or {}
+            
+            # Build skills by category from DB
             skills_by_category = {}
             for skill in all_skills:
                 category = skill.category or "technical"
@@ -105,7 +107,47 @@ async def get_public_portfolio(
                     skills_by_category[category] = []
                 skills_by_category[category].append(skill.skill_name)
             
-            # Build social links dict
+            # Fallback: if no skills in DB, use merged_data
+            if not all_skills:
+                skills_by_category = {
+                    "technical": merged.get("technicalSkills", []),
+                    "soft": merged.get("softSkills", []),
+                    "language": merged.get("languages", []),
+                }
+            
+            # Build projects from DB
+            projects_list = [
+                {
+                    "name": project.name,
+                    "description": project.description,
+                    "url": project.url,
+                    "github_url": project.github_url,
+                    "technologies": project.technologies or [],
+                    "start_date": project.start_date.isoformat() if project.start_date else None,
+                    "end_date": project.end_date.isoformat() if project.end_date else None,
+                    "is_featured": project.is_featured
+                }
+                for project in projects
+            ]
+            
+            # Fallback: if no projects in DB, use merged_data
+            if not projects_list:
+                projects_list = [
+                    {
+                        "name": p.get("name", ""),
+                        "description": p.get("description", ""),
+                        "url": p.get("url", ""),
+                        "github_url": p.get("github_url", ""),
+                        "technologies": p.get("technologies", []),
+                        "start_date": None,
+                        "end_date": None,
+                        "is_featured": False
+                    }
+                    for p in merged.get("projects", [])
+                    if isinstance(p, dict) and p.get("name")
+                ]
+            
+            # Build social links dict from DB
             social_dict = {}
             for link in social_links:
                 social_dict[link.platform] = {
@@ -113,35 +155,40 @@ async def get_public_portfolio(
                     "username": link.username
                 }
             
-            # Build sections dict
+            # Fallback: if no social links in DB, use merged_data
+            if not social_dict and merged.get("social"):
+                for platform, url in merged.get("social", {}).items():
+                    if isinstance(url, str):
+                        social_dict[platform] = {"url": url, "username": None}
+            
+            # Build sections dict from DB
             sections_dict = {}
             for section in sections:
                 sections_dict[section.section_type] = section.content
             
+            # Fallback: if no sections in DB, use merged_data
+            if not sections_dict:
+                for key in ["experience", "education", "certifications", "awards", "publications"]:
+                    if merged.get(key):
+                        sections_dict[key] = merged[key]
+            
+            # Summary fallback
+            summary = profile_data.summary
+            if not summary or summary == "Portfolio created from GitHub profile":
+                summary = merged.get("summary") or merged.get("bio") or profile_data.summary
+            
             result["profile"] = {
-                "name": profile_data.name,
-                "email": profile_data.email,
-                "phone": profile_data.phone,
-                "location": profile_data.location,
-                "summary": profile_data.summary,
+                "name": profile_data.name or merged.get("name"),
+                "email": profile_data.email or merged.get("email"),
+                "phone": profile_data.phone or merged.get("phone"),
+                "location": profile_data.location or merged.get("location"),
+                "summary": summary,
                 "github_username": profile_data.github_username,
                 "technicalSkills": skills_by_category.get("technical", []),
                 "softSkills": skills_by_category.get("soft", []),
                 "languages": skills_by_category.get("language", []),
                 "allSkills": skills_by_category,
-                "projects": [
-                    {
-                        "name": project.name,
-                        "description": project.description,
-                        "url": project.url,
-                        "github_url": project.github_url,
-                        "technologies": project.technologies or [],
-                        "start_date": project.start_date.isoformat() if project.start_date else None,
-                        "end_date": project.end_date.isoformat() if project.end_date else None,
-                        "is_featured": project.is_featured
-                    }
-                    for project in projects
-                ],
+                "projects": projects_list,
                 "social": social_dict,
                 "sections": sections_dict,
                 "github_data": profile_data.github_data,
@@ -282,6 +329,37 @@ async def publish_portfolio_route(
         return {"status": "success", "portfolio_id": str(portfolio.id), "is_public": True}
     except Exception as e:
         print(f"Publish portfolio error: {e}")
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+
+@router.delete("/{portfolio_id}")
+async def delete_portfolio_route(
+    portfolio_id: str,
+    db: Session = Depends(get_db),
+    firebase_user: dict = Depends(get_firebase_user)
+):
+    """Delete a portfolio"""
+    try:
+        portfolio = db.query(models.Portfolio).filter(
+            models.Portfolio.id == portfolio_id
+        ).first()
+
+        if not portfolio:
+            return {"status": "error", "message": "Portfolio not found"}
+
+        user = get_user_by_firebase_uid(db, firebase_user["firebase_uid"])
+        if portfolio.user_id != user.id:
+            return {"status": "error", "message": "Unauthorized"}
+
+        db.delete(portfolio)
+        db.commit()
+
+        return {"status": "success", "message": "Portfolio deleted"}
+    except Exception as e:
+        print(f"Delete portfolio error: {e}")
         return {
             "status": "error",
             "message": str(e)
