@@ -30,7 +30,14 @@ export function AuthProvider({ children }) {
         setLoading(false);
       },
       (err) => {
-        setError(err.message);
+        const msg = err?.message || "";
+        if (msg.includes("api-key-not-valid") || msg.includes("invalid-api-key")) {
+          setError(
+            "Firebase is not configured. Add your Firebase web app config to frontend/.env.local (see frontend/FIREBASE_SETUP.md). Restart the dev server after changing .env.local."
+          );
+        } else {
+          setError(err.message);
+        }
         setLoading(false);
       }
     );
@@ -43,7 +50,14 @@ export function AuthProvider({ children }) {
       await signOut(auth);
       setCurrentUser(null);
     } catch (err) {
-      setError(err.message);
+      const msg = err?.message || "";
+      if (msg.includes("api-key-not-valid") || msg.includes("invalid-api-key")) {
+        setError(
+          "Firebase is not configured. Add your Firebase web app config to frontend/.env.local (see frontend/FIREBASE_SETUP.md). Restart the dev server after changing .env.local."
+        );
+      } else {
+        setError(err.message);
+      }
     }
   };
 

@@ -5,7 +5,7 @@ CRUD API endpoints for all database models
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from uuid import UUID
+
 from typing import List, Optional
 
 from app.db.database import get_db
@@ -39,7 +39,7 @@ router = APIRouter(prefix="/api", tags=["CRUD"])
 # ── Helper schema for version creation ──
 class VersionCreateRequest(BaseModel):
     data: dict
-    changed_by: Optional[UUID] = None
+    changed_by: Optional[str] = None
     change_description: Optional[str] = None
 
 
@@ -71,7 +71,7 @@ def list_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 
 
 @router.get("/users/{user_id}", response_model=UserResponse)
-def get_user(user_id: UUID, db: Session = Depends(get_db)):
+def get_user(user_id: str, db: Session = Depends(get_db)):
     """Get a user by ID"""
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
@@ -89,7 +89,7 @@ def get_user_by_email(email: str, db: Session = Depends(get_db)):
 
 
 @router.put("/users/{user_id}", response_model=UserResponse)
-def update_user(user_id: UUID, updates: UserUpdate, db: Session = Depends(get_db)):
+def update_user(user_id: str, updates: UserUpdate, db: Session = Depends(get_db)):
     """Update a user"""
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
@@ -102,7 +102,7 @@ def update_user(user_id: UUID, updates: UserUpdate, db: Session = Depends(get_db
 
 
 @router.delete("/users/{user_id}", status_code=204)
-def delete_user(user_id: UUID, db: Session = Depends(get_db)):
+def delete_user(user_id: str, db: Session = Depends(get_db)):
     """Delete a user and all associated data"""
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
@@ -117,7 +117,7 @@ def delete_user(user_id: UUID, db: Session = Depends(get_db)):
 # ═══════════════════════════════════════════
 
 @router.post("/users/{user_id}/portfolios", response_model=PortfolioResponse, status_code=201)
-def create_portfolio(user_id: UUID, portfolio: PortfolioCreate, db: Session = Depends(get_db)):
+def create_portfolio(user_id: str, portfolio: PortfolioCreate, db: Session = Depends(get_db)):
     """Create a portfolio for a user"""
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
@@ -135,13 +135,13 @@ def create_portfolio(user_id: UUID, portfolio: PortfolioCreate, db: Session = De
 
 
 @router.get("/users/{user_id}/portfolios", response_model=List[PortfolioResponse])
-def list_user_portfolios(user_id: UUID, db: Session = Depends(get_db)):
+def list_user_portfolios(user_id: str, db: Session = Depends(get_db)):
     """List all portfolios for a user"""
     return db.query(models.Portfolio).filter(models.Portfolio.user_id == user_id).all()
 
 
 @router.get("/portfolios/{portfolio_id}", response_model=PortfolioResponse)
-def get_portfolio(portfolio_id: UUID, db: Session = Depends(get_db)):
+def get_portfolio(portfolio_id: str, db: Session = Depends(get_db)):
     """Get a portfolio by ID"""
     portfolio = db.query(models.Portfolio).filter(models.Portfolio.id == portfolio_id).first()
     if not portfolio:
@@ -150,7 +150,7 @@ def get_portfolio(portfolio_id: UUID, db: Session = Depends(get_db)):
 
 
 @router.get("/portfolios/{portfolio_id}/detail", response_model=PortfolioDetailResponse)
-def get_portfolio_detail(portfolio_id: UUID, db: Session = Depends(get_db)):
+def get_portfolio_detail(portfolio_id: str, db: Session = Depends(get_db)):
     """Get a portfolio with all related data"""
     portfolio = db.query(models.Portfolio).filter(models.Portfolio.id == portfolio_id).first()
     if not portfolio:
@@ -166,7 +166,7 @@ def get_portfolio_detail(portfolio_id: UUID, db: Session = Depends(get_db)):
 
 
 @router.put("/portfolios/{portfolio_id}", response_model=PortfolioResponse)
-def update_portfolio(portfolio_id: UUID, updates: PortfolioUpdate, db: Session = Depends(get_db)):
+def update_portfolio(portfolio_id: str, updates: PortfolioUpdate, db: Session = Depends(get_db)):
     """Update a portfolio"""
     portfolio = db.query(models.Portfolio).filter(models.Portfolio.id == portfolio_id).first()
     if not portfolio:
@@ -179,7 +179,7 @@ def update_portfolio(portfolio_id: UUID, updates: PortfolioUpdate, db: Session =
 
 
 @router.delete("/portfolios/{portfolio_id}", status_code=204)
-def delete_portfolio(portfolio_id: UUID, db: Session = Depends(get_db)):
+def delete_portfolio(portfolio_id: str, db: Session = Depends(get_db)):
     """Delete a portfolio and all associated data"""
     portfolio = db.query(models.Portfolio).filter(models.Portfolio.id == portfolio_id).first()
     if not portfolio:
@@ -194,7 +194,7 @@ def delete_portfolio(portfolio_id: UUID, db: Session = Depends(get_db)):
 # ═══════════════════════════════════════════
 
 @router.post("/portfolios/{portfolio_id}/resume-data", response_model=ResumeDataResponse, status_code=201)
-def create_resume_data(portfolio_id: UUID, resume: ResumeDataCreate, db: Session = Depends(get_db)):
+def create_resume_data(portfolio_id: str, resume: ResumeDataCreate, db: Session = Depends(get_db)):
     """Upload/create resume data for a portfolio"""
     portfolio = db.query(models.Portfolio).filter(models.Portfolio.id == portfolio_id).first()
     if not portfolio:
@@ -212,13 +212,13 @@ def create_resume_data(portfolio_id: UUID, resume: ResumeDataCreate, db: Session
 
 
 @router.get("/portfolios/{portfolio_id}/resume-data", response_model=List[ResumeDataResponse])
-def list_resume_data(portfolio_id: UUID, db: Session = Depends(get_db)):
+def list_resume_data(portfolio_id: str, db: Session = Depends(get_db)):
     """List all resume data for a portfolio"""
     return db.query(models.ResumeData).filter(models.ResumeData.portfolio_id == portfolio_id).all()
 
 
 @router.get("/resume-data/{resume_id}", response_model=ResumeDataResponse)
-def get_resume_data(resume_id: UUID, db: Session = Depends(get_db)):
+def get_resume_data(resume_id: str, db: Session = Depends(get_db)):
     """Get resume data by ID"""
     resume = db.query(models.ResumeData).filter(models.ResumeData.id == resume_id).first()
     if not resume:
@@ -227,7 +227,7 @@ def get_resume_data(resume_id: UUID, db: Session = Depends(get_db)):
 
 
 @router.delete("/resume-data/{resume_id}", status_code=204)
-def delete_resume_data(resume_id: UUID, db: Session = Depends(get_db)):
+def delete_resume_data(resume_id: str, db: Session = Depends(get_db)):
     """Delete resume data"""
     resume = db.query(models.ResumeData).filter(models.ResumeData.id == resume_id).first()
     if not resume:
@@ -242,7 +242,7 @@ def delete_resume_data(resume_id: UUID, db: Session = Depends(get_db)):
 # ═══════════════════════════════════════════
 
 @router.post("/portfolios/{portfolio_id}/profile", response_model=ProfileDataResponse, status_code=201)
-def create_profile_data(portfolio_id: UUID, profile: ProfileDataCreate, db: Session = Depends(get_db)):
+def create_profile_data(portfolio_id: str, profile: ProfileDataCreate, db: Session = Depends(get_db)):
     """Create or update profile data for a portfolio (upsert)"""
     portfolio = db.query(models.Portfolio).filter(models.Portfolio.id == portfolio_id).first()
     if not portfolio:
@@ -264,7 +264,7 @@ def create_profile_data(portfolio_id: UUID, profile: ProfileDataCreate, db: Sess
 
 
 @router.get("/portfolios/{portfolio_id}/profile", response_model=ProfileDataResponse)
-def get_profile_data(portfolio_id: UUID, db: Session = Depends(get_db)):
+def get_profile_data(portfolio_id: str, db: Session = Depends(get_db)):
     """Get profile data for a portfolio"""
     profile = db.query(models.ProfileData).filter(models.ProfileData.portfolio_id == portfolio_id).first()
     if not profile:
@@ -273,7 +273,7 @@ def get_profile_data(portfolio_id: UUID, db: Session = Depends(get_db)):
 
 
 @router.put("/portfolios/{portfolio_id}/profile", response_model=ProfileDataResponse)
-def update_profile_data(portfolio_id: UUID, updates: ProfileDataUpdate, db: Session = Depends(get_db)):
+def update_profile_data(portfolio_id: str, updates: ProfileDataUpdate, db: Session = Depends(get_db)):
     """Update profile data for a portfolio"""
     profile = db.query(models.ProfileData).filter(models.ProfileData.portfolio_id == portfolio_id).first()
     if not profile:
@@ -286,7 +286,7 @@ def update_profile_data(portfolio_id: UUID, updates: ProfileDataUpdate, db: Sess
 
 
 @router.delete("/portfolios/{portfolio_id}/profile", status_code=204)
-def delete_profile_data(portfolio_id: UUID, db: Session = Depends(get_db)):
+def delete_profile_data(portfolio_id: str, db: Session = Depends(get_db)):
     """Delete profile data for a portfolio"""
     profile = db.query(models.ProfileData).filter(models.ProfileData.portfolio_id == portfolio_id).first()
     if not profile:
@@ -301,7 +301,7 @@ def delete_profile_data(portfolio_id: UUID, db: Session = Depends(get_db)):
 # ═══════════════════════════════════════════
 
 @router.post("/portfolios/{portfolio_id}/projects", response_model=ProjectResponse, status_code=201)
-def create_project(portfolio_id: UUID, project: ProjectCreate, db: Session = Depends(get_db)):
+def create_project(portfolio_id: str, project: ProjectCreate, db: Session = Depends(get_db)):
     """Create a project for a portfolio"""
     portfolio = db.query(models.Portfolio).filter(models.Portfolio.id == portfolio_id).first()
     if not portfolio:
@@ -314,13 +314,13 @@ def create_project(portfolio_id: UUID, project: ProjectCreate, db: Session = Dep
 
 
 @router.get("/portfolios/{portfolio_id}/projects", response_model=List[ProjectResponse])
-def list_projects(portfolio_id: UUID, db: Session = Depends(get_db)):
+def list_projects(portfolio_id: str, db: Session = Depends(get_db)):
     """List all projects for a portfolio"""
     return db.query(models.Project).filter(models.Project.portfolio_id == portfolio_id).all()
 
 
 @router.get("/projects/{project_id}", response_model=ProjectResponse)
-def get_project(project_id: UUID, db: Session = Depends(get_db)):
+def get_project(project_id: str, db: Session = Depends(get_db)):
     """Get a project by ID"""
     project = db.query(models.Project).filter(models.Project.id == project_id).first()
     if not project:
@@ -329,7 +329,7 @@ def get_project(project_id: UUID, db: Session = Depends(get_db)):
 
 
 @router.put("/projects/{project_id}", response_model=ProjectResponse)
-def update_project(project_id: UUID, updates: ProjectUpdate, db: Session = Depends(get_db)):
+def update_project(project_id: str, updates: ProjectUpdate, db: Session = Depends(get_db)):
     """Update a project"""
     project = db.query(models.Project).filter(models.Project.id == project_id).first()
     if not project:
@@ -343,7 +343,7 @@ def update_project(project_id: UUID, updates: ProjectUpdate, db: Session = Depen
 
 
 @router.delete("/projects/{project_id}", status_code=204)
-def delete_project(project_id: UUID, db: Session = Depends(get_db)):
+def delete_project(project_id: str, db: Session = Depends(get_db)):
     """Delete a project"""
     project = db.query(models.Project).filter(models.Project.id == project_id).first()
     if not project:
@@ -358,7 +358,7 @@ def delete_project(project_id: UUID, db: Session = Depends(get_db)):
 # ═══════════════════════════════════════════
 
 @router.post("/portfolios/{portfolio_id}/skills", response_model=SkillResponse, status_code=201)
-def create_skill(portfolio_id: UUID, skill: SkillCreate, db: Session = Depends(get_db)):
+def create_skill(portfolio_id: str, skill: SkillCreate, db: Session = Depends(get_db)):
     """Create a skill for a portfolio"""
     portfolio = db.query(models.Portfolio).filter(models.Portfolio.id == portfolio_id).first()
     if not portfolio:
@@ -371,7 +371,7 @@ def create_skill(portfolio_id: UUID, skill: SkillCreate, db: Session = Depends(g
 
 
 @router.post("/portfolios/{portfolio_id}/skills/bulk", response_model=List[SkillResponse], status_code=201)
-def bulk_create_skills(portfolio_id: UUID, skills: List[SkillCreate], db: Session = Depends(get_db)):
+def bulk_create_skills(portfolio_id: str, skills: List[SkillCreate], db: Session = Depends(get_db)):
     """Create multiple skills at once"""
     portfolio = db.query(models.Portfolio).filter(models.Portfolio.id == portfolio_id).first()
     if not portfolio:
@@ -385,13 +385,13 @@ def bulk_create_skills(portfolio_id: UUID, skills: List[SkillCreate], db: Sessio
 
 
 @router.get("/portfolios/{portfolio_id}/skills", response_model=List[SkillResponse])
-def list_skills(portfolio_id: UUID, db: Session = Depends(get_db)):
+def list_skills(portfolio_id: str, db: Session = Depends(get_db)):
     """List all skills for a portfolio"""
     return db.query(models.Skill).filter(models.Skill.portfolio_id == portfolio_id).all()
 
 
 @router.get("/users/{user_id}/skills", response_model=List[SkillResponse])
-def get_skills_by_user(user_id: UUID, db: Session = Depends(get_db)):
+def get_skills_by_user(user_id: str, db: Session = Depends(get_db)):
     """Get all skills for a user across all their portfolios"""
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
@@ -405,7 +405,7 @@ def get_skills_by_user(user_id: UUID, db: Session = Depends(get_db)):
 
 
 @router.get("/skills/{skill_id}", response_model=SkillResponse)
-def get_skill(skill_id: UUID, db: Session = Depends(get_db)):
+def get_skill(skill_id: str, db: Session = Depends(get_db)):
     """Get a skill by ID"""
     skill = db.query(models.Skill).filter(models.Skill.id == skill_id).first()
     if not skill:
@@ -414,7 +414,7 @@ def get_skill(skill_id: UUID, db: Session = Depends(get_db)):
 
 
 @router.put("/skills/{skill_id}", response_model=SkillResponse)
-def update_skill(skill_id: UUID, updates: SkillUpdate, db: Session = Depends(get_db)):
+def update_skill(skill_id: str, updates: SkillUpdate, db: Session = Depends(get_db)):
     """Update a skill"""
     skill = db.query(models.Skill).filter(models.Skill.id == skill_id).first()
     if not skill:
@@ -428,7 +428,7 @@ def update_skill(skill_id: UUID, updates: SkillUpdate, db: Session = Depends(get
 
 
 @router.delete("/skills/{skill_id}", status_code=204)
-def delete_skill(skill_id: UUID, db: Session = Depends(get_db)):
+def delete_skill(skill_id: str, db: Session = Depends(get_db)):
     """Delete a skill"""
     skill = db.query(models.Skill).filter(models.Skill.id == skill_id).first()
     if not skill:
@@ -443,7 +443,7 @@ def delete_skill(skill_id: UUID, db: Session = Depends(get_db)):
 # ═══════════════════════════════════════════
 
 @router.post("/portfolios/{portfolio_id}/social-links", response_model=SocialLinkResponse, status_code=201)
-def create_social_link(portfolio_id: UUID, link: SocialLinkCreate, db: Session = Depends(get_db)):
+def create_social_link(portfolio_id: str, link: SocialLinkCreate, db: Session = Depends(get_db)):
     """Create a social link for a portfolio"""
     portfolio = db.query(models.Portfolio).filter(models.Portfolio.id == portfolio_id).first()
     if not portfolio:
@@ -456,7 +456,7 @@ def create_social_link(portfolio_id: UUID, link: SocialLinkCreate, db: Session =
 
 
 @router.post("/portfolios/{portfolio_id}/social-links/bulk", response_model=List[SocialLinkResponse], status_code=201)
-def bulk_create_social_links(portfolio_id: UUID, links: List[SocialLinkCreate], db: Session = Depends(get_db)):
+def bulk_create_social_links(portfolio_id: str, links: List[SocialLinkCreate], db: Session = Depends(get_db)):
     """Create multiple social links at once"""
     portfolio = db.query(models.Portfolio).filter(models.Portfolio.id == portfolio_id).first()
     if not portfolio:
@@ -470,13 +470,13 @@ def bulk_create_social_links(portfolio_id: UUID, links: List[SocialLinkCreate], 
 
 
 @router.get("/portfolios/{portfolio_id}/social-links", response_model=List[SocialLinkResponse])
-def list_social_links(portfolio_id: UUID, db: Session = Depends(get_db)):
+def list_social_links(portfolio_id: str, db: Session = Depends(get_db)):
     """List all social links for a portfolio"""
     return db.query(models.SocialLink).filter(models.SocialLink.portfolio_id == portfolio_id).all()
 
 
 @router.get("/social-links/{link_id}", response_model=SocialLinkResponse)
-def get_social_link(link_id: UUID, db: Session = Depends(get_db)):
+def get_social_link(link_id: str, db: Session = Depends(get_db)):
     """Get a social link by ID"""
     link = db.query(models.SocialLink).filter(models.SocialLink.id == link_id).first()
     if not link:
@@ -485,7 +485,7 @@ def get_social_link(link_id: UUID, db: Session = Depends(get_db)):
 
 
 @router.put("/social-links/{link_id}", response_model=SocialLinkResponse)
-def update_social_link(link_id: UUID, updates: SocialLinkUpdate, db: Session = Depends(get_db)):
+def update_social_link(link_id: str, updates: SocialLinkUpdate, db: Session = Depends(get_db)):
     """Update a social link"""
     link = db.query(models.SocialLink).filter(models.SocialLink.id == link_id).first()
     if not link:
@@ -499,7 +499,7 @@ def update_social_link(link_id: UUID, updates: SocialLinkUpdate, db: Session = D
 
 
 @router.delete("/social-links/{link_id}", status_code=204)
-def delete_social_link(link_id: UUID, db: Session = Depends(get_db)):
+def delete_social_link(link_id: str, db: Session = Depends(get_db)):
     """Delete a social link"""
     link = db.query(models.SocialLink).filter(models.SocialLink.id == link_id).first()
     if not link:
@@ -514,7 +514,7 @@ def delete_social_link(link_id: UUID, db: Session = Depends(get_db)):
 # ═══════════════════════════════════════════
 
 @router.post("/portfolios/{portfolio_id}/sections", response_model=PortfolioSectionResponse, status_code=201)
-def create_section(portfolio_id: UUID, section: PortfolioSectionCreate, db: Session = Depends(get_db)):
+def create_section(portfolio_id: str, section: PortfolioSectionCreate, db: Session = Depends(get_db)):
     """Create a portfolio section"""
     portfolio = db.query(models.Portfolio).filter(models.Portfolio.id == portfolio_id).first()
     if not portfolio:
@@ -527,7 +527,7 @@ def create_section(portfolio_id: UUID, section: PortfolioSectionCreate, db: Sess
 
 
 @router.get("/portfolios/{portfolio_id}/sections", response_model=List[PortfolioSectionResponse])
-def list_sections(portfolio_id: UUID, db: Session = Depends(get_db)):
+def list_sections(portfolio_id: str, db: Session = Depends(get_db)):
     """List all sections for a portfolio, ordered by order_index"""
     return (
         db.query(models.PortfolioSection)
@@ -538,7 +538,7 @@ def list_sections(portfolio_id: UUID, db: Session = Depends(get_db)):
 
 
 @router.get("/sections/{section_id}", response_model=PortfolioSectionResponse)
-def get_section(section_id: UUID, db: Session = Depends(get_db)):
+def get_section(section_id: str, db: Session = Depends(get_db)):
     """Get a section by ID"""
     section = db.query(models.PortfolioSection).filter(models.PortfolioSection.id == section_id).first()
     if not section:
@@ -547,7 +547,7 @@ def get_section(section_id: UUID, db: Session = Depends(get_db)):
 
 
 @router.put("/sections/{section_id}", response_model=PortfolioSectionResponse)
-def update_section(section_id: UUID, updates: PortfolioSectionUpdate, db: Session = Depends(get_db)):
+def update_section(section_id: str, updates: PortfolioSectionUpdate, db: Session = Depends(get_db)):
     """Update a portfolio section"""
     section = db.query(models.PortfolioSection).filter(models.PortfolioSection.id == section_id).first()
     if not section:
@@ -561,7 +561,7 @@ def update_section(section_id: UUID, updates: PortfolioSectionUpdate, db: Sessio
 
 
 @router.delete("/sections/{section_id}", status_code=204)
-def delete_section(section_id: UUID, db: Session = Depends(get_db)):
+def delete_section(section_id: str, db: Session = Depends(get_db)):
     """Delete a portfolio section"""
     section = db.query(models.PortfolioSection).filter(models.PortfolioSection.id == section_id).first()
     if not section:
@@ -576,7 +576,7 @@ def delete_section(section_id: UUID, db: Session = Depends(get_db)):
 # ═══════════════════════════════════════════
 
 @router.post("/users/{user_id}/credentials", response_model=APICredentialResponse, status_code=201)
-def create_credential(user_id: UUID, cred: APICredentialCreate, db: Session = Depends(get_db)):
+def create_credential(user_id: str, cred: APICredentialCreate, db: Session = Depends(get_db)):
     """Store an API credential for a user"""
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
@@ -594,13 +594,13 @@ def create_credential(user_id: UUID, cred: APICredentialCreate, db: Session = De
 
 
 @router.get("/users/{user_id}/credentials", response_model=List[APICredentialResponse])
-def list_credentials(user_id: UUID, db: Session = Depends(get_db)):
+def list_credentials(user_id: str, db: Session = Depends(get_db)):
     """List all API credentials for a user (tokens hidden)"""
     return db.query(models.APICredential).filter(models.APICredential.user_id == user_id).all()
 
 
 @router.delete("/credentials/{cred_id}", status_code=204)
-def delete_credential(cred_id: UUID, db: Session = Depends(get_db)):
+def delete_credential(cred_id: str, db: Session = Depends(get_db)):
     """Delete an API credential"""
     cred = db.query(models.APICredential).filter(models.APICredential.id == cred_id).first()
     if not cred:
@@ -616,7 +616,7 @@ def delete_credential(cred_id: UUID, db: Session = Depends(get_db)):
 
 @router.post("/portfolios/{portfolio_id}/versions", response_model=PortfolioVersionResponse, status_code=201)
 def create_version(
-    portfolio_id: UUID,
+    portfolio_id: str,
     body: VersionCreateRequest,
     db: Session = Depends(get_db),
 ):
@@ -648,7 +648,7 @@ def create_version(
 
 
 @router.get("/portfolios/{portfolio_id}/versions", response_model=List[PortfolioVersionResponse])
-def list_versions(portfolio_id: UUID, db: Session = Depends(get_db)):
+def list_versions(portfolio_id: str, db: Session = Depends(get_db)):
     """List all versions for a portfolio"""
     return (
         db.query(models.PortfolioVersion)
@@ -659,7 +659,7 @@ def list_versions(portfolio_id: UUID, db: Session = Depends(get_db)):
 
 
 @router.get("/versions/{version_id}", response_model=PortfolioVersionResponse)
-def get_version(version_id: UUID, db: Session = Depends(get_db)):
+def get_version(version_id: str, db: Session = Depends(get_db)):
     """Get a specific version by ID"""
     version = db.query(models.PortfolioVersion).filter(models.PortfolioVersion.id == version_id).first()
     if not version:

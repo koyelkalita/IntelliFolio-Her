@@ -5,7 +5,6 @@ import Link from "next/link";
 import { DashboardSidebar } from "@/components/dashboard";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  generatePortfolio,
   getPortfolios,
   getPortfolioProfile,
   getPortfolioSkills,
@@ -95,16 +94,11 @@ export default function EditPortfolioPage() {
       .slice(0, 2);
   };
   const handleGenerate = async () => {
-    const result = await generatePortfolio({
-      formData,
-      workExperience,
-      education,
-      projects,
-      publications,
-      awards,
-    });
-
-    console.log(result);
+    setLoading(true);
+    if (isEditing) {
+      await handleSave();
+    }
+    window.location.href = "/dashboard";
   };
 
   // ─── Load portfolio data from API ───
@@ -1600,11 +1594,10 @@ export default function EditPortfolioPage() {
                 <button
                   onClick={isEditing ? handleSave : () => setIsEditing(true)}
                   disabled={saving}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isEditing
-                      ? "bg-gray-600 text-white hover:bg-gray-700"
-                      : "bg-green-600 text-white hover:bg-green-700"
-                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isEditing
+                    ? "bg-gray-600 text-white hover:bg-gray-700"
+                    : "bg-green-600 text-white hover:bg-green-700"
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   {saving
                     ? "Saving..."
@@ -1633,11 +1626,10 @@ export default function EditPortfolioPage() {
                       <button
                         key={index}
                         onClick={() => setCurrentSection(index)}
-                        className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                          index === currentSection
-                            ? "bg-gray-800"
-                            : "bg-gray-300 hover:bg-gray-400"
-                        }`}
+                        className={`w-2.5 h-2.5 rounded-full transition-colors ${index === currentSection
+                          ? "bg-gray-800"
+                          : "bg-gray-300 hover:bg-gray-400"
+                          }`}
                       />
                     ))}
                   </div>
@@ -1720,7 +1712,7 @@ export default function EditPortfolioPage() {
                   d="M13 10V3L4 14h7v7l9-11h-7z"
                 />
               </svg>
-              {loading ? "Generating..." : "Create Portfolio Site →"}
+              {loading ? "Saving..." : "Save & Return to Dashboard →"}
             </button>
           </div>
         </footer>
