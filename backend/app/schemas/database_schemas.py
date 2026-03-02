@@ -3,9 +3,8 @@ Pydantic schemas for database models - used for API validation
 """
 
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional, List
+from typing import Any, Optional, List
 from datetime import datetime
-from uuid import UUID
 
 
 # ─────── USER SCHEMAS ───────
@@ -22,7 +21,7 @@ class UserUpdate(BaseModel):
 
 
 class UserResponse(BaseModel):
-    id: UUID
+    id: str
     email: str
     display_name: Optional[str]
     avatar_url: Optional[str]
@@ -49,8 +48,8 @@ class PortfolioUpdate(BaseModel):
 
 
 class PortfolioResponse(BaseModel):
-    id: UUID
-    user_id: UUID
+    id: str
+    user_id: str
     title: Optional[str]
     slug: Optional[str]
     status: str
@@ -73,8 +72,8 @@ class ResumeDataCreate(BaseModel):
 
 
 class ResumeDataResponse(BaseModel):
-    id: UUID
-    portfolio_id: UUID
+    id: str
+    portfolio_id: str
     file_name: str
     file_url: str
     parsed_json: dict
@@ -110,8 +109,8 @@ class ProfileDataUpdate(BaseModel):
 
 
 class ProfileDataResponse(BaseModel):
-    id: UUID
-    portfolio_id: UUID
+    id: str
+    portfolio_id: str
     name: Optional[str]
     email: Optional[str]
     phone: Optional[str]
@@ -152,13 +151,13 @@ class ProjectUpdate(BaseModel):
 
 
 class ProjectResponse(BaseModel):
-    id: UUID
-    portfolio_id: UUID
+    id: str
+    portfolio_id: str
     name: str
     description: Optional[str]
     url: Optional[str]
     github_url: Optional[str]
-    technologies: List[str]
+    technologies: Optional[List[str]]
     start_date: Optional[datetime]
     end_date: Optional[datetime]
     is_featured: bool
@@ -184,8 +183,8 @@ class SkillUpdate(BaseModel):
 
 
 class SkillResponse(BaseModel):
-    id: UUID
-    portfolio_id: UUID
+    id: str
+    portfolio_id: str
     skill_name: str
     category: Optional[str]
     proficiency_level: Optional[str]
@@ -211,8 +210,8 @@ class SocialLinkUpdate(BaseModel):
 
 
 class SocialLinkResponse(BaseModel):
-    id: UUID
-    portfolio_id: UUID
+    id: str
+    portfolio_id: str
     platform: str
     url: str
     username: Optional[str]
@@ -226,23 +225,23 @@ class SocialLinkResponse(BaseModel):
 
 class PortfolioSectionCreate(BaseModel):
     section_type: str
-    content: dict
+    content: Any
     order_index: int = 0
     is_visible: bool = True
 
 
 class PortfolioSectionUpdate(BaseModel):
     section_type: Optional[str] = None
-    content: Optional[dict] = None
+    content: Optional[Any] = None
     order_index: Optional[int] = None
     is_visible: Optional[bool] = None
 
 
 class PortfolioSectionResponse(BaseModel):
-    id: UUID
-    portfolio_id: UUID
+    id: str
+    portfolio_id: str
     section_type: str
-    content: dict
+    content: Any
     order_index: int
     is_visible: bool
     updated_at: datetime
@@ -260,8 +259,8 @@ class APICredentialCreate(BaseModel):
 
 
 class APICredentialResponse(BaseModel):
-    id: UUID
-    user_id: UUID
+    id: str
+    user_id: str
     service: str
     username: Optional[str]
     created_at: datetime
@@ -275,11 +274,11 @@ class APICredentialResponse(BaseModel):
 # ─────── PORTFOLIO VERSION SCHEMAS ───────
 
 class PortfolioVersionResponse(BaseModel):
-    id: UUID
-    portfolio_id: UUID
+    id: str
+    portfolio_id: str
     version_number: int
     data: dict
-    changed_by: Optional[UUID] = None
+    changed_by: Optional[str] = None
     change_description: Optional[str] = None
     created_at: datetime
 

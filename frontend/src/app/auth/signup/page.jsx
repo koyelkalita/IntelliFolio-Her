@@ -16,7 +16,8 @@ export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
-  const { currentUser } = useAuth();
+  const { currentUser, error: authError } = useAuth();
+  const displayError = error || authError || "";
 
   // Redirect if already logged in
   React.useEffect(() => {
@@ -57,7 +58,14 @@ export default function SignUpPage() {
 
       router.push("/dashboard");
     } catch (err) {
-      setError(err.message);
+      const msg = err?.message || "";
+      if (msg.includes("api-key-not-valid") || msg.includes("invalid-api-key")) {
+        setError(
+          "Firebase is not configured. Add your Firebase web app config to frontend/.env.local (see Firebase Console → Project settings → Your apps). Restart the dev server after changing .env.local."
+        );
+      } else {
+        setError(err.message);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -88,7 +96,14 @@ export default function SignUpPage() {
 
       router.push("/dashboard");
     } catch (err) {
-      setError(err.message);
+      const msg = err?.message || "";
+      if (msg.includes("api-key-not-valid") || msg.includes("invalid-api-key")) {
+        setError(
+          "Firebase is not configured. Add your Firebase web app config to frontend/.env.local (see Firebase Console → Project settings → Your apps). Restart the dev server after changing .env.local."
+        );
+      } else {
+        setError(err.message);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -113,9 +128,9 @@ export default function SignUpPage() {
             Create Account
           </h1>
 
-          {error && (
+          {displayError && (
             <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
-              {error}
+              {displayError}
             </div>
           )}
 
