@@ -6,18 +6,29 @@ import os
 
 app = Flask(__name__)
 
+# -------------------------
+# Ensure portfolio folder exists
+# -------------------------
 if not os.path.exists("generated_portfolios"):
     os.makedirs("generated_portfolios")
 
 # -------------------------
-# Home Route (Fixes 404)
+# GitHub Auth Headers
+# -------------------------
+def get_github_headers():
+    headers = {"Accept": "application/vnd.github.v3+json"}
+    token = os.getenv("GITHUB_API_TOKEN")
+    if token:
+        headers["Authorization"] = f"token {token}"
+    return headers
+
+# -------------------------
+# Home Route
 # -------------------------
 @app.route("/")
 def home():
     return """
     <h2>Smart Portfolio Generator Backend is Running</h2>
-    <p>Use POST /generate to create a portfolio.</p>
-    <p>Or test directly below:</p>
     <form action="/generate" method="post" enctype="multipart/form-data">
         GitHub Username: <input type="text" name="username" required><br><br>
         Resume (PDF): <input type="file" name="resume" required><br><br>
@@ -29,12 +40,7 @@ def home():
 # Extract Contact Info
 # -------------------------
 def extract_contact_info(text):
-
-    contact = {
-        "email": None,
-        "linkedin": None,
-        "phone": None
-    }
+    contact = {"email": None, "linkedin": None, "phone": None}
 
     email_match = re.search(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", text)
     if email_match:
@@ -69,7 +75,6 @@ def extract_text_from_pdf(file):
 # Parse Resume Sections
 # -------------------------
 def parse_resume_sections(text):
-
     sections = {
         "education": "",
         "skills": "",
@@ -100,20 +105,13 @@ def parse_resume_sections(text):
             current_section = "achievements"
             continue
 
-        if any(keyword in lower for keyword in [
-            "selected", "top", "scholarship", "published",
-            "award", "grant", "honor"
-        ]):
-            sections["achievements"] += line + "<br>"
-            continue
-
         if current_section:
             sections[current_section] += line + "<br>"
 
     return sections
 
 # -------------------------
-# Generate Portfolio UI
+# Generate Portfolio HTML
 # -------------------------
 def generate_portfolio(user, repos, resume_sections, contact):
 
@@ -125,11 +123,14 @@ def generate_portfolio(user, repos, resume_sections, contact):
 
     repo_cards = ""
     for repo in repos[:4]:
+        if repo.get("fork"):
+            continue
+
         repo_cards += f"""
-        <div class="card">
-            <h3>{repo['name']}</h3>
-            <p>{repo['description'] or "No description available"}</p>
-            <a href="{repo['html_url']}" target="_blank">View →</a>
+        <div style="border:1px solid #ddd; padding:10px; margin-bottom:10px;">
+            <h3>{repo.get('name')}</h3>
+            <p>{repo.get('description') or "No description available"}</p>
+            <a href="{repo.get('html_url')}" target="_blank">View Repository</a>
         </div>
         """
 
@@ -139,14 +140,22 @@ def generate_portfolio(user, repos, resume_sections, contact):
     <head>
         <title>{name} | Portfolio</title>
     </head>
-    <body>
+    <body style="font-family:Arial; max-width:800px; margin:auto;">
         <h1>{name}</h1>
         <p>{bio}</p>
         <p>📍 {location}</p>
         <p><a href="{github_url}" target="_blank">Visit GitHub</a></p>
+
         <hr>
         <h2>Projects</h2>
         {repo_cards}
+
+        <hr>
+        <h2>Skills</h2>
+        {resume_sections.get("skills")}
+
+        <h2>Education</h2>
+        {resume_sections.get("education")}
     </body>
     </html>
     """
@@ -163,13 +172,24 @@ def generate():
     if not username or not resume_file:
         return {"status": "error", "message": "Username and resume required"}
 
-    user_res = requests.get(f"https://api.github.com/users/{username}")
-    repo_res = requests.get(f"https://api.github.com/users/{username}/repos?sort=updated")
+    headers = get_github_headers()
 
-    if response.status_code == 403:
-        print("GitHub API rate limit exceeded.")
-    elif response.status_code == 404:
-        print(f"GitHub user '{username}' not found.")
+    user_res = requests.get(
+        f"https://api.github.com/users/{username}",
+        headers=headers
+    )
+
+    if user_res.status_code != 200:
+        return {
+            "status": "error",
+            "message": user_res.json().get("message", "GitHub API error")
+        }
+
+    repo_res = requests.get(
+        f"https://api.github.com/users/{username}/repos?sort=updated",
+        headers=headers
+    )
+
     user_data = user_res.json()
     repo_data = repo_res.json()
 
@@ -177,7 +197,12 @@ def generate():
     resume_sections = parse_resume_sections(resume_text)
     contact_info = extract_contact_info(resume_text)
 
-    html_content = generate_portfolio(user_data, repo_data, resume_sections, contact_info)
+    html_content = generate_portfolio(
+        user_data,
+        repo_data,
+        resume_sections,
+        contact_info
+    )
 
     filename = f"generated_portfolios/{username}.html"
 
@@ -198,9 +223,10 @@ def serve_portfolio(username):
     if os.path.exists(filepath):
         with open(filepath, "r", encoding="utf-8") as f:
             return f.read()
-    else:
-        return "<h2>Portfolio not found.</h2>"
+    return "<h2>Portfolio not found.</h2>"
 
-# For local development only
+# -------------------------
+# Local Run
+# -------------------------
 if __name__ == "__main__":
     app.run()
