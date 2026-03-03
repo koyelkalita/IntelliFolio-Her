@@ -21,7 +21,7 @@ def _call_openrouter(prompt: str, max_tokens: int = 4096) -> str:
             headers={
                 "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json",
-                "HTTP-Referer": os.getenv("OPENROUTER_REFERER", "http://localhost:3000"),
+                "HTTP-Referer": os.getenv("OPENROUTER_REFERER", "https://intellifolio-subdomain.vercel.app"),
             },
             json={
                 "model": model,
