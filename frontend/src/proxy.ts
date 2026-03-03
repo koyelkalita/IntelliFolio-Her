@@ -2,21 +2,28 @@ import { NextRequest, NextResponse } from "next/server";
 
 export function proxy(req: NextRequest) {
   const host = req.headers.get("host") || "";
+  const url = req.nextUrl;
 
-  // Extract subdomain
   const subdomain = host.split(".")[0];
 
-  // Allow localhost & root domain
+  // Allow localhost and root domain
   if (
     host.includes("localhost") ||
     subdomain === "www" ||
-    subdomain === "intellifolio"
+    subdomain === "intellifolio-subdomain"
+  ) {
+    return NextResponse.next();
+  }
+
+  // Ignore Next.js internals and static assets
+  if (
+    url.pathname.startsWith("/_next") ||
+    url.pathname.startsWith("/api") ||
+    url.pathname.includes(".")
   ) {
     return NextResponse.next();
   }
 
   // Rewrite subdomain → /slug
-  return NextResponse.rewrite(
-    new URL(`/${subdomain}`, req.url)
-  );
+  return NextResponse.rewrite(new URL(`/${subdomain}`, req.url));
 }
