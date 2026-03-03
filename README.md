@@ -1,4 +1,4 @@
-# IntelliFolio-Her
+# IntelliFolio
 ## AI-Based Dynamic Portfolio Website Generator
 
 IntelliFolio is an AI-driven full-stack system that generates deployment-ready portfolio websites from resume and GitHub data using multi-agent AI orchestration, structured data processing, and dynamic template rendering.
