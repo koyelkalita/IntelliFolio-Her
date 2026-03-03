@@ -84,14 +84,14 @@ export default function DashboardPage() {
     if (!window.confirm("Delete this portfolio? This cannot be undone.")) return;
     try {
       const token = await currentUser.getIdToken();
-      const response = await fetch(`http://localhost:8000/portfolios/${portfolioId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/portfolios/${portfolioId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
         // If we deleted the active one, reset it
         if (activePortfolio?.id === portfolioId) setActivePortfolio(null);
-        const result = await fetch(`http://localhost:8000/portfolios`, {
+        const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/portfolios`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await result.json();
@@ -332,8 +332,7 @@ export default function DashboardPage() {
                               try {
                                 if (!currentUser) return;
                                 const token = await currentUser.getIdToken();
-                                const response = await fetch(
-                                  `http://localhost:8000/portfolios/${portfolio.id}/publish`,
+                                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/portfolios/${portfolio.id}/publish`,
                                   {
                                     method: "POST",
                                     headers: { Authorization: `Bearer ${token}` },
@@ -459,8 +458,7 @@ export default function DashboardPage() {
                           if (!currentUser || !activePortfolio) return;
                           try {
                             const token = await currentUser.getIdToken();
-                            await fetch(
-                              `http://localhost:8000/portfolios/${activePortfolio.id}/publish`,
+                            await fetch(`${process.env.NEXT_PUBLIC_API_URL}/portfolios/${activePortfolio.id}/publish`,
                               { method: "POST", headers: { Authorization: `Bearer ${token}` } }
                             );
                             const result = await getPortfolios(token);
