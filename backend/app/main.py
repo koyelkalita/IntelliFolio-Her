@@ -17,7 +17,7 @@ app = FastAPI(title="IntelliFolio-Her")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://intellifolio-subdomain.vercel.app/"],
+    allow_origins=["https://intellifolio-subdomain.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
