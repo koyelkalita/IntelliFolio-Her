@@ -166,12 +166,10 @@ def generate():
     user_res = requests.get(f"https://api.github.com/users/{username}")
     repo_res = requests.get(f"https://api.github.com/users/{username}/repos?sort=updated")
 
-    if user_res.status_code != 200:
-        return {
-        "status": "error",
-        "message": f"GitHub API error: {user_res.json().get('message')}"
-        }
-
+    if response.status_code == 403:
+        print("GitHub API rate limit exceeded.")
+    elif response.status_code == 404:
+        print(f"GitHub user '{username}' not found.")
     user_data = user_res.json()
     repo_data = repo_res.json()
 

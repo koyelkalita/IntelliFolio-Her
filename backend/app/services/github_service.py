@@ -7,11 +7,14 @@ GITHUB_API_BASE = "https://api.github.com"
 
 
 def _get_headers():
-    """Get GitHub API headers with optional auth token for higher rate limits."""
     headers = {"Accept": "application/vnd.github.v3+json"}
     token = os.getenv("GITHUB_API_TOKEN", "").strip()
+
+    print("TOKEN PRESENT:", bool(token))  # DEBUG LINE
+
     if token:
         headers["Authorization"] = f"token {token}"
+
     return headers
 
 
