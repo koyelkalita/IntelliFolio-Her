@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block theme_style %}
+<style>
+    body {
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        color: #ffffff;
+    }
+
+    .card {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(18px);
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+
+    .card:hover {
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    a {
+        color: #00f2fe;
+        font-weight: 500;
+    }
+
+    a:hover {
+        color: #ffffff;
+    }
+
+    .btn {
+        background: linear-gradient(135deg, #00f2fe, #4facfe);
+        color: #000;
+    }
+
+    .btn:hover {
+        background: #ffffff;
+        color: #000;
+    }
+</style>
+{% endblock %}
