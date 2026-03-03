@@ -4,18 +4,30 @@ import PyPDF2
 import re
 import os
 
-
-
-
 app = Flask(__name__)
+
 if not os.path.exists("generated_portfolios"):
     os.makedirs("generated_portfolios")
 
 # -------------------------
-# Extract Resume Text
+# Home Route (Fixes 404)
 # -------------------------
+@app.route("/")
+def home():
+    return """
+    <h2>Smart Portfolio Generator Backend is Running</h2>
+    <p>Use POST /generate to create a portfolio.</p>
+    <p>Or test directly below:</p>
+    <form action="/generate" method="post" enctype="multipart/form-data">
+        GitHub Username: <input type="text" name="username" required><br><br>
+        Resume (PDF): <input type="file" name="resume" required><br><br>
+        <button type="submit">Generate Portfolio</button>
+    </form>
+    """
 
-
+# -------------------------
+# Extract Contact Info
+# -------------------------
 def extract_contact_info(text):
 
     contact = {
@@ -24,12 +36,10 @@ def extract_contact_info(text):
         "phone": None
     }
 
-    # Extract Email
     email_match = re.search(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", text)
     if email_match:
         contact["email"] = email_match.group()
 
-    # Extract LinkedIn
     linkedin_match = re.search(r"(https?://)?(www\.)?linkedin\.com/in/[A-Za-z0-9_-]+", text)
     if linkedin_match:
         link = linkedin_match.group()
@@ -37,20 +47,23 @@ def extract_contact_info(text):
             link = "https://" + link
         contact["linkedin"] = link
 
-    # Extract Phone (Indian format friendly)
     phone_match = re.search(r"(\+91[\s-]?\d{10}|\b\d{10}\b)", text)
     if phone_match:
         contact["phone"] = phone_match.group()
 
     return contact
 
+# -------------------------
+# Extract Text From PDF
+# -------------------------
 def extract_text_from_pdf(file):
     reader = PyPDF2.PdfReader(file)
     text = ""
     for page in reader.pages:
-        text += page.extract_text() + "\n"
+        extracted = page.extract_text()
+        if extracted:
+            text += extracted + "\n"
     return text
-
 
 # -------------------------
 # Parse Resume Sections
@@ -87,7 +100,6 @@ def parse_resume_sections(text):
             current_section = "achievements"
             continue
 
-        # Smart achievement detection (even without heading)
         if any(keyword in lower for keyword in [
             "selected", "top", "scholarship", "published",
             "award", "grant", "honor"
@@ -100,13 +112,10 @@ def parse_resume_sections(text):
 
     return sections
 
-
-
 # -------------------------
 # Generate Portfolio UI
 # -------------------------
 def generate_portfolio(user, repos, resume_sections, contact):
-
 
     name = user.get("name") or user.get("login")
     bio = user.get("bio") or "Passionate Developer"
@@ -129,135 +138,30 @@ def generate_portfolio(user, repos, resume_sections, contact):
     <html>
     <head>
         <title>{name} | Portfolio</title>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-        <style>
-            body {{
-                margin: 0;
-                font-family: 'Poppins', sans-serif;
-                background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-                color: white;
-            }}
-
-            header {{
-                text-align: center;
-                padding: 80px 20px;
-            }}
-
-            header img {{
-                width: 150px;
-                border-radius: 50%;
-                border: 4px solid white;
-            }}
-
-            .section {{
-                padding: 60px 8%;
-            }}
-
-            .grid {{
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                gap: 25px;
-            }}
-
-            .card {{
-                background: rgba(255,255,255,0.1);
-                backdrop-filter: blur(15px);
-                padding: 25px;
-                border-radius: 20px;
-                transition: 0.3s;
-                min-height: 200px;
-            }}
-
-            .card:hover {{
-                transform: translateY(-8px);
-                background: rgba(255,255,255,0.2);
-            }}
-
-            h2 {{
-                margin-bottom: 20px;
-            }}
-
-            a {{
-                color: #00f2fe;
-                text-decoration: none;
-            }}
-
-            footer {{
-                text-align: center;
-                padding: 30px;
-                opacity: 0.7;
-            }}
-        </style>
     </head>
     <body>
-
-        <header>
-    <img src="{avatar}">
-    <h1>{name}</h1>
-    <p>{bio}</p>
-    <p>📍 {location}</p>
-
-    <div style="margin-top:20px;">
-        {f'<p>📧 <a href="mailto:{contact["email"]}" style="color:#00f2fe;">{contact["email"]}</a></p>' if contact["email"] else ''}
-        {f'<p>💼 <a href="{contact["linkedin"]}" target="_blank" style="color:#00f2fe;">LinkedIn</a></p>' if contact["linkedin"] else ''}
-        {f'<p>📱 {contact["phone"]}</p>' if contact["phone"] else ''}
-    </div>
-
-    <a href="{github_url}" target="_blank" style="color:#00f2fe;">Visit GitHub</a>
-</header>
-
-
-        <div class="section">
-            <h2>📊 GitHub Projects</h2>
-            <div class="grid">
-                {repo_cards}
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>🎓 Education</h2>
-            <div class="card">{resume_sections['education'] or "Not found in resume."}</div>
-        </div>
-
-        <div class="section">
-            <h2>🛠 Skills</h2>
-            <div class="card">{resume_sections['skills'] or "Not found in resume."}</div>
-        </div>
-
-        <div class="section">
-            <h2>🚀 Projects (From Resume)</h2>
-            <div class="card">{resume_sections['projects'] or "Not found in resume."}</div>
-        </div>
-
-        <div class="section">
-        <h2>🏆 Achievements</h2>
-        <div class="card">
-            {resume_sections['achievements'] or "Highlights and recognitions will appear here."}
-        </div>
-        </div>
-        <div class="section">
-        <h2>💼 Experience</h2>
-        <div class="card">
-            {resume_sections['experience'] if resume_sections['experience'] else 
-            "🚀 Actively seeking challenging opportunities to apply technical skills, contribute meaningfully, and grow in a dynamic engineering environment."}
-        </div>
-        </div>
-
-
-        <footer>
-            © 2026 {name} | Smart Portfolio Generator
-        </footer>
-
+        <h1>{name}</h1>
+        <p>{bio}</p>
+        <p>📍 {location}</p>
+        <p><a href="{github_url}" target="_blank">Visit GitHub</a></p>
+        <hr>
+        <h2>Projects</h2>
+        {repo_cards}
     </body>
     </html>
     """
 
-
+# -------------------------
+# Generate Route
+# -------------------------
 @app.route("/generate", methods=["POST"])
 def generate():
 
     username = request.form.get("username")
     resume_file = request.files.get("resume")
+
+    if not username or not resume_file:
+        return {"status": "error", "message": "Username and resume required"}
 
     user_res = requests.get(f"https://api.github.com/users/{username}")
     repo_res = requests.get(f"https://api.github.com/users/{username}/repos?sort=updated")
@@ -284,6 +188,9 @@ def generate():
         "url": f"/portfolio/{username}"
     }
 
+# -------------------------
+# Serve Generated Portfolio
+# -------------------------
 @app.route("/portfolio/<username>")
 def serve_portfolio(username):
     filepath = f"generated_portfolios/{username}.html"
@@ -293,7 +200,6 @@ def serve_portfolio(username):
     else:
         return "<h2>Portfolio not found.</h2>"
 
-
+# For local development only
 if __name__ == "__main__":
-    app.run(debug=True)
-
+    app.run()
