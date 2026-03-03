@@ -167,7 +167,10 @@ def generate():
     repo_res = requests.get(f"https://api.github.com/users/{username}/repos?sort=updated")
 
     if user_res.status_code != 200:
-        return {"status": "error", "message": "GitHub user not found"}
+        return {
+        "status": "error",
+        "message": f"GitHub API error: {user_res.json().get('message')}"
+        }
 
     user_data = user_res.json()
     repo_data = repo_res.json()
