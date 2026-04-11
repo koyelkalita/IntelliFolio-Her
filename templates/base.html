@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ user.name or user.login }} | Portfolio</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --accent: #06b6d4;
+            --radius: 18px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            transition: background 0.4s ease;
+        }
+
+        a {
+            text-decoration: none;
+            transition: 0.3s ease;
+        }
+
+        img {
+            max-width: 100%;
+        }
+
+        header {
+            padding: 80px 20px 60px 20px;
+            text-align: center;
+        }
+
+        .profile-img {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+            border: 5px solid rgba(255,255,255,0.3);
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        .contact-links p {
+            margin: 6px 0;
+            font-size: 14px;
+        }
+
+        .section {
+            padding: 70px 10%;
+        }
+
+        .section h2 {
+            font-size: 24px;
+            margin-bottom: 30px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            padding: 28px;
+            border-radius: var(--radius);
+            transition: all 0.3s ease;
+            min-height: 180px;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .card p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 10px 22px;
+            margin-top: 15px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .section {
+                padding: 50px 6%;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+
+    {% block theme_style %}{% endblock %}
+
+</head>
+<body>
+
+<header>
+    <img src="{{ user.avatar_url }}" class="profile-img">
+
+    <h1>{{ user.name or user.login }}</h1>
+
+    <p class="subtitle">{{ user.bio }}</p>
+    <p class="subtitle">📍 {{ user.location }}</p>
+
+    <div class="contact-links">
+        {% if contact.email %}
+            <p>📧 <a href="mailto:{{ contact.email }}">{{ contact.email }}</a></p>
+        {% endif %}
+
+        {% if contact.linkedin %}
+            <p>💼 <a href="{{ contact.linkedin }}" target="_blank">LinkedIn Profile</a></p>
+        {% endif %}
+    </div>
+
+    <a href="{{ user.html_url }}" target="_blank" class="btn">View GitHub</a>
+</header>
+
+
+<!-- GitHub Projects -->
+<div class="section">
+    <h2>🚀 Featured Projects</h2>
+    <div class="grid">
+        {% for repo in repos %}
+        <div class="card">
+            <h3>{{ repo.name }}</h3>
+            <p>{{ repo.description or "No description available." }}</p>
+            <br>
+            <a href="{{ repo.html_url }}" target="_blank">View Project →</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+<!-- Resume Sections -->
+<div class="section">
+    <h2>🎓 Education</h2>
+    <div class="card">
+        {{ resume.education|safe }}
+    </div>
+</div>
+
+<div class="section">
+    <h2>🛠 Skills</h2>
+    <div class="card">
+        {{ resume.skills|safe }}
+    </div>
+</div>
+
+<div class="section">
+    <h2>🏆 Achievements</h2>
+    <div class="card">
+        {{ resume.achievements|safe }}
+    </div>
+</div>
+
+<div class="section">
+    <h2>💼 Experience</h2>
+    <div class="card">
+        {{ resume.experience if resume.experience else
+        "🚀 Actively seeking impactful opportunities to apply and grow technical expertise in dynamic environments." }}
+    </div>
+</div>
+
+<footer>
+    © 2026 {{ user.name or user.login }} — Built with IntelliFolio
+</footer>
+
+</body>
+</html>
