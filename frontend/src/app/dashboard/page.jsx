@@ -5,7 +5,7 @@ import Link from "next/link";
 import { DashboardLayout, SignOutButton } from "@/components/dashboard";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
-import { getPortfolios } from "@/lib/api";
+import { API_BASE, getPortfolios } from "@/lib/api";
 
 export default function DashboardPage() {
   const { currentUser } = useAuth();
@@ -197,7 +197,7 @@ export default function DashboardPage() {
                               if (!currentUser) return;
                               const token = await currentUser.getIdToken();
                               const response = await fetch(
-                                `http://localhost:8000/portfolios/${portfolio.id}/publish`,
+                                `${API_BASE}/portfolios/${portfolio.id}/publish`,
                                 {
                                   method: "POST",
                                   headers: { Authorization: `Bearer ${token}` },

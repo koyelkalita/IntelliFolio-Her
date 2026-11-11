@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import { usePortfolio } from "@/contexts/PortfolioContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { API_BASE } from "@/lib/api";
 
 export function BuildPortfolioForm({ templateType = "professional" }) {
   const router = useRouter();
@@ -57,7 +58,7 @@ export function BuildPortfolioForm({ templateType = "professional" }) {
       // If file is uploaded, parse it first
       if (resumeFile) {
         try {
-          const parseResult = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/ai/parse-resume`, {
+          const parseResult = await fetch(`${API_BASE}/ai/parse-resume`, {
             method: "POST",
             body: (() => {
               const formData = new FormData();

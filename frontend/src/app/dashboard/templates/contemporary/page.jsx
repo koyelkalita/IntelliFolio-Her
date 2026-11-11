@@ -10,6 +10,7 @@ import {
   getPortfolioSocialLinks,
   getPortfolioSections,
 } from "@/lib/api";
+import AnoAI from "@/components/animated-shader-background";
 
 /* ───────── Social Icons ───────── */
 const SocialIcon = ({ platform }) => {
@@ -288,8 +289,14 @@ export default function ContemporaryTemplatePage() {
   /* ── Render ── */
   return (
     <div className="min-h-screen bg-linear-to-b from-gray-950 via-black to-gray-950 text-white">
+      {/* ── Shader background ── */}
+      <div className="fixed inset-0 z-0">
+        <AnoAI />
+        <div className="absolute inset-0 bg-black/60" />
+      </div>
+
       {/* ── Sticky nav ── */}
-      <nav className="sticky top-0 z-50 bg-black/60 backdrop-blur-lg border-b border-white/10">
+      <nav className="sticky top-0 z-50 bg-black/40 backdrop-blur-lg border-b border-white/10">
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="w-7 h-7 rounded-md bg-white/10 flex items-center justify-center text-xs font-bold">
@@ -343,7 +350,7 @@ export default function ContemporaryTemplatePage() {
       </nav>
 
       {/* ── Hero ── */}
-      <header className="pt-32 pb-24 text-center px-6">
+      <header className="relative z-10 pt-32 pb-24 text-center px-6">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-4">
             {name}
@@ -458,391 +465,393 @@ export default function ContemporaryTemplatePage() {
         </div>
       </header>
 
-      <Divider />
+      <div className="relative z-10">
+        <Divider />
 
-      {/* ── About / Bio ── */}
-      {bio && (
-        <>
-          <Section id="about" title="About Me">
-            <p className="text-gray-300 leading-relaxed whitespace-pre-line text-lg">
-              {bio}
-            </p>
-          </Section>
-          <Divider />
-        </>
-      )}
+        {/* ── About / Bio ── */}
+        {bio && (
+          <>
+            <Section id="about" title="About Me">
+              <p className="text-gray-300 leading-relaxed whitespace-pre-line text-lg">
+                {bio}
+              </p>
+            </Section>
+            <Divider />
+          </>
+        )}
 
-      {/* ── Work Experience ── */}
-      {sections.experience?.length > 0 && (
-        <>
-          <Section id="experience" title="Work Experience">
-            <div className="space-y-8">
-              {sections.experience.map((exp, i) => (
-                <div key={i} className="border-l-2 border-blue-500 pl-6">
-                  <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between mb-1">
-                    <h3 className="text-xl font-semibold">{exp.title}</h3>
-                    {(exp.startDate || exp.endDate) && (
-                      <span className="text-sm text-gray-500 whitespace-nowrap">
-                        {exp.startDate}
-                        {exp.endDate && ` – ${exp.endDate}`}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-blue-400 font-medium mb-2">
-                    {exp.company}
-                    {exp.location && ` · ${exp.location}`}
-                  </p>
-                  {exp.description && (
-                    <p className="text-gray-400 text-sm leading-relaxed">
-                      {exp.description}
+        {/* ── Work Experience ── */}
+        {sections.experience?.length > 0 && (
+          <>
+            <Section id="experience" title="Work Experience">
+              <div className="space-y-8">
+                {sections.experience.map((exp, i) => (
+                  <div key={i} className="border-l-2 border-blue-500 pl-6">
+                    <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between mb-1">
+                      <h3 className="text-xl font-semibold">{exp.title}</h3>
+                      {(exp.startDate || exp.endDate) && (
+                        <span className="text-sm text-gray-500 whitespace-nowrap">
+                          {exp.startDate}
+                          {exp.endDate && ` – ${exp.endDate}`}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-blue-400 font-medium mb-2">
+                      {exp.company}
+                      {exp.location && ` · ${exp.location}`}
                     </p>
-                  )}
-                  {exp.enhanced_description &&
-                    Array.isArray(exp.enhanced_description) &&
-                    exp.enhanced_description.length > 0 && (
-                      <ul className="mt-2 list-disc list-inside text-gray-400 text-sm space-y-1">
-                        {exp.enhanced_description.map((d, j) => (
-                          <li key={j}>{d}</li>
-                        ))}
-                      </ul>
+                    {exp.description && (
+                      <p className="text-gray-400 text-sm leading-relaxed">
+                        {exp.description}
+                      </p>
                     )}
-                  {exp.achievements &&
-                    Array.isArray(exp.achievements) &&
-                    exp.achievements.length > 0 && (
-                      <ul className="mt-2 list-disc list-inside text-gray-400 text-sm space-y-1">
-                        {exp.achievements.map((a, j) => (
-                          <li key={j}>{a}</li>
-                        ))}
-                      </ul>
-                    )}
-                </div>
-              ))}
-            </div>
-          </Section>
-          <Divider />
-        </>
-      )}
-
-      {/* ── Education ── */}
-      {sections.education?.length > 0 && (
-        <>
-          <Section id="education" title="Education">
-            <div className="space-y-8">
-              {sections.education.map((edu, i) => (
-                <div key={i} className="border-l-2 border-purple-500 pl-6">
-                  <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between mb-1">
-                    <h3 className="text-xl font-semibold">
-                      {edu.degree}
-                      {edu.field && ` in ${edu.field}`}
-                    </h3>
-                    {(edu.startDate || edu.endDate) && (
-                      <span className="text-sm text-gray-500 whitespace-nowrap">
-                        {edu.startDate}
-                        {edu.endDate && ` – ${edu.endDate}`}
-                      </span>
-                    )}
+                    {exp.enhanced_description &&
+                      Array.isArray(exp.enhanced_description) &&
+                      exp.enhanced_description.length > 0 && (
+                        <ul className="mt-2 list-disc list-inside text-gray-400 text-sm space-y-1">
+                          {exp.enhanced_description.map((d, j) => (
+                            <li key={j}>{d}</li>
+                          ))}
+                        </ul>
+                      )}
+                    {exp.achievements &&
+                      Array.isArray(exp.achievements) &&
+                      exp.achievements.length > 0 && (
+                        <ul className="mt-2 list-disc list-inside text-gray-400 text-sm space-y-1">
+                          {exp.achievements.map((a, j) => (
+                            <li key={j}>{a}</li>
+                          ))}
+                        </ul>
+                      )}
                   </div>
-                  <p className="text-purple-400 font-medium mb-1">
-                    {edu.institution}
-                    {edu.location && ` · ${edu.location}`}
-                  </p>
-                  {edu.gpa && (
-                    <p className="text-sm text-gray-500">GPA: {edu.gpa}</p>
-                  )}
-                  {edu.achievements &&
-                    Array.isArray(edu.achievements) &&
-                    edu.achievements.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-3">
-                        {edu.achievements.map((a, j) => (
+                ))}
+              </div>
+            </Section>
+            <Divider />
+          </>
+        )}
+
+        {/* ── Education ── */}
+        {sections.education?.length > 0 && (
+          <>
+            <Section id="education" title="Education">
+              <div className="space-y-8">
+                {sections.education.map((edu, i) => (
+                  <div key={i} className="border-l-2 border-purple-500 pl-6">
+                    <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between mb-1">
+                      <h3 className="text-xl font-semibold">
+                        {edu.degree}
+                        {edu.field && ` in ${edu.field}`}
+                      </h3>
+                      {(edu.startDate || edu.endDate) && (
+                        <span className="text-sm text-gray-500 whitespace-nowrap">
+                          {edu.startDate}
+                          {edu.endDate && ` – ${edu.endDate}`}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-purple-400 font-medium mb-1">
+                      {edu.institution}
+                      {edu.location && ` · ${edu.location}`}
+                    </p>
+                    {edu.gpa && (
+                      <p className="text-sm text-gray-500">GPA: {edu.gpa}</p>
+                    )}
+                    {edu.achievements &&
+                      Array.isArray(edu.achievements) &&
+                      edu.achievements.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          {edu.achievements.map((a, j) => (
+                            <span
+                              key={j}
+                              className="text-xs px-3 py-1 rounded-full bg-purple-900/30 text-purple-300"
+                            >
+                              {a}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                  </div>
+                ))}
+              </div>
+            </Section>
+            <Divider />
+          </>
+        )}
+
+        {/* ── Projects ── */}
+        {projects.length > 0 && (
+          <>
+            <Section id="projects" title="Projects">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {projects.map((p, i) => (
+                  <div
+                    key={i}
+                    className="bg-white/5 border border-white/10 rounded-xl p-6 hover:border-blue-500/50 transition-colors"
+                  >
+                    <h3 className="text-lg font-semibold mb-2">{p.name}</h3>
+                    {p.description && (
+                      <p className="text-gray-400 text-sm mb-4">
+                        {p.description}
+                      </p>
+                    )}
+                    {p.technologies?.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {p.technologies.map((t, j) => (
                           <span
                             key={j}
-                            className="text-xs px-3 py-1 rounded-full bg-purple-900/30 text-purple-300"
+                            className="text-xs px-2.5 py-1 rounded-full bg-blue-900/30 text-blue-300"
                           >
-                            {a}
+                            {t}
                           </span>
                         ))}
                       </div>
                     )}
-                </div>
-              ))}
-            </div>
-          </Section>
-          <Divider />
-        </>
-      )}
-
-      {/* ── Projects ── */}
-      {projects.length > 0 && (
-        <>
-          <Section id="projects" title="Projects">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {projects.map((p, i) => (
-                <div
-                  key={i}
-                  className="bg-white/5 border border-white/10 rounded-xl p-6 hover:border-blue-500/50 transition-colors"
-                >
-                  <h3 className="text-lg font-semibold mb-2">{p.name}</h3>
-                  {p.description && (
-                    <p className="text-gray-400 text-sm mb-4">
-                      {p.description}
-                    </p>
-                  )}
-                  {p.technologies?.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {p.technologies.map((t, j) => (
-                        <span
-                          key={j}
-                          className="text-xs px-2.5 py-1 rounded-full bg-blue-900/30 text-blue-300"
-                        >
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  {(p.url || p.github_url) && (
-                    <div className="flex gap-4 text-sm">
-                      {p.url && (
-                        <a
-                          href={p.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-400 hover:underline"
-                        >
-                          Live Demo →
-                        </a>
-                      )}
-                      {p.github_url && (
-                        <a
-                          href={p.github_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-400 hover:underline"
-                        >
-                          GitHub →
-                        </a>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </Section>
-          <Divider />
-        </>
-      )}
-
-      {/* ── Skills ── */}
-      {hasSkills > 0 && (
-        <>
-          <Section id="skills" title="Skills">
-            {skills.technical.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                  Technical
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {skills.technical.map((s, i) => (
-                    <span
-                      key={i}
-                      className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-gray-300 hover:border-blue-500/50 transition-colors"
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-            {skills.soft.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                  Soft Skills
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {skills.soft.map((s, i) => (
-                    <span
-                      key={i}
-                      className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-gray-300 hover:border-green-500/50 transition-colors"
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-            {skills.language.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                  Languages
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {skills.language.map((l, i) => (
-                    <span
-                      key={i}
-                      className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-gray-300 hover:border-purple-500/50 transition-colors"
-                    >
-                      {l}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </Section>
-          <Divider />
-        </>
-      )}
-
-      {/* ── Publications ── */}
-      {sections.publications?.length > 0 && (
-        <>
-          <Section id="publications" title="Publications">
-            <div className="space-y-6">
-              {sections.publications.map((pub, i) => (
-                <div
-                  key={i}
-                  className="bg-white/5 border border-white/10 rounded-xl p-6"
-                >
-                  <h3 className="text-lg font-semibold mb-1">
-                    {typeof pub === "string" ? pub : pub.title}
-                  </h3>
-                  {pub.authors && (
-                    <p className="text-sm text-gray-400">{pub.authors}</p>
-                  )}
-                  {(pub.journal || pub.year) && (
-                    <p className="text-sm text-gray-500 mt-1">
-                      {pub.journal}
-                      {pub.year && ` · ${pub.year}`}
-                    </p>
-                  )}
-                  {pub.doi && (
-                    <a
-                      href={`https://doi.org/${pub.doi}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-400 text-sm hover:underline mt-1 inline-block"
-                    >
-                      DOI: {pub.doi}
-                    </a>
-                  )}
-                </div>
-              ))}
-            </div>
-          </Section>
-          <Divider />
-        </>
-      )}
-
-      {/* ── Awards ── */}
-      {sections.awards?.length > 0 && (
-        <>
-          <Section id="awards" title="Awards & Honors">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {sections.awards.map((a, i) => (
-                <div
-                  key={i}
-                  className="bg-white/5 border border-white/10 rounded-xl p-6 flex items-start gap-4"
-                >
-                  <span className="w-9 h-9 shrink-0 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-400">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
-                      />
-                    </svg>
-                  </span>
-                  <div>
-                    <h3 className="font-semibold">
-                      {typeof a === "string" ? a : a.title}
-                    </h3>
-                    {(a.organization || a.year) && (
-                      <p className="text-sm text-gray-500">
-                        {a.organization}
-                        {a.year && ` · ${a.year}`}
-                      </p>
-                    )}
-                    {a.description && (
-                      <p className="text-sm text-gray-400 mt-1">
-                        {a.description}
-                      </p>
+                    {(p.url || p.github_url) && (
+                      <div className="flex gap-4 text-sm">
+                        {p.url && (
+                          <a
+                            href={p.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-400 hover:underline"
+                          >
+                            Live Demo →
+                          </a>
+                        )}
+                        {p.github_url && (
+                          <a
+                            href={p.github_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-400 hover:underline"
+                          >
+                            GitHub →
+                          </a>
+                        )}
+                      </div>
                     )}
                   </div>
-                </div>
-              ))}
-            </div>
-          </Section>
-          <Divider />
-        </>
-      )}
-
-      {/* ── Certifications ── */}
-      {sections.certifications?.length > 0 && (
-        <>
-          <Section id="certifications" title="Certifications">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {sections.certifications.map((c, i) => (
-                <div
-                  key={i}
-                  className="bg-white/5 border border-white/10 rounded-xl p-6 flex items-start gap-4"
-                >
-                  <span className="w-9 h-9 shrink-0 rounded-full bg-green-500/10 flex items-center justify-center text-green-400">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  </span>
-                  <div>
-                    <h3 className="font-semibold">
-                      {typeof c === "string" ? c : c.name || c.title}
-                    </h3>
-                    {c.issuer && (
-                      <p className="text-sm text-gray-500">{c.issuer}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Section>
-          <Divider />
-        </>
-      )}
-
-      {/* ── Footer ── */}
-      <footer className="py-16 text-center text-gray-500 text-sm">
-        <p>
-          © {new Date().getFullYear()} {name}. All rights reserved.
-        </p>
-        {socialLinks.length > 0 && (
-          <div className="flex justify-center gap-4 mt-4">
-            {socialLinks.map((l, i) => (
-              <a
-                key={i}
-                href={l.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={l.platform}
-                className="text-gray-500 hover:text-white transition-colors"
-              >
-                <SocialIcon platform={l.platform} />
-              </a>
-            ))}
-          </div>
+                ))}
+              </div>
+            </Section>
+            <Divider />
+          </>
         )}
-      </footer>
+
+        {/* ── Skills ── */}
+        {hasSkills > 0 && (
+          <>
+            <Section id="skills" title="Skills">
+              {skills.technical.length > 0 && (
+                <div className="mb-8">
+                  <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                    Technical
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {skills.technical.map((s, i) => (
+                      <span
+                        key={i}
+                        className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-gray-300 hover:border-blue-500/50 transition-colors"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {skills.soft.length > 0 && (
+                <div className="mb-8">
+                  <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                    Soft Skills
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {skills.soft.map((s, i) => (
+                      <span
+                        key={i}
+                        className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-gray-300 hover:border-green-500/50 transition-colors"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {skills.language.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                    Languages
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {skills.language.map((l, i) => (
+                      <span
+                        key={i}
+                        className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-gray-300 hover:border-purple-500/50 transition-colors"
+                      >
+                        {l}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </Section>
+            <Divider />
+          </>
+        )}
+
+        {/* ── Publications ── */}
+        {sections.publications?.length > 0 && (
+          <>
+            <Section id="publications" title="Publications">
+              <div className="space-y-6">
+                {sections.publications.map((pub, i) => (
+                  <div
+                    key={i}
+                    className="bg-white/5 border border-white/10 rounded-xl p-6"
+                  >
+                    <h3 className="text-lg font-semibold mb-1">
+                      {typeof pub === "string" ? pub : pub.title}
+                    </h3>
+                    {pub.authors && (
+                      <p className="text-sm text-gray-400">{pub.authors}</p>
+                    )}
+                    {(pub.journal || pub.year) && (
+                      <p className="text-sm text-gray-500 mt-1">
+                        {pub.journal}
+                        {pub.year && ` · ${pub.year}`}
+                      </p>
+                    )}
+                    {pub.doi && (
+                      <a
+                        href={`https://doi.org/${pub.doi}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 text-sm hover:underline mt-1 inline-block"
+                      >
+                        DOI: {pub.doi}
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Section>
+            <Divider />
+          </>
+        )}
+
+        {/* ── Awards ── */}
+        {sections.awards?.length > 0 && (
+          <>
+            <Section id="awards" title="Awards & Honors">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {sections.awards.map((a, i) => (
+                  <div
+                    key={i}
+                    className="bg-white/5 border border-white/10 rounded-xl p-6 flex items-start gap-4"
+                  >
+                    <span className="w-9 h-9 shrink-0 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-400">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+                        />
+                      </svg>
+                    </span>
+                    <div>
+                      <h3 className="font-semibold">
+                        {typeof a === "string" ? a : a.title}
+                      </h3>
+                      {(a.organization || a.year) && (
+                        <p className="text-sm text-gray-500">
+                          {a.organization}
+                          {a.year && ` · ${a.year}`}
+                        </p>
+                      )}
+                      {a.description && (
+                        <p className="text-sm text-gray-400 mt-1">
+                          {a.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Section>
+            <Divider />
+          </>
+        )}
+
+        {/* ── Certifications ── */}
+        {sections.certifications?.length > 0 && (
+          <>
+            <Section id="certifications" title="Certifications">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {sections.certifications.map((c, i) => (
+                  <div
+                    key={i}
+                    className="bg-white/5 border border-white/10 rounded-xl p-6 flex items-start gap-4"
+                  >
+                    <span className="w-9 h-9 shrink-0 rounded-full bg-green-500/10 flex items-center justify-center text-green-400">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </span>
+                    <div>
+                      <h3 className="font-semibold">
+                        {typeof c === "string" ? c : c.name || c.title}
+                      </h3>
+                      {c.issuer && (
+                        <p className="text-sm text-gray-500">{c.issuer}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Section>
+            <Divider />
+          </>
+        )}
+
+        {/* ── Footer ── */}
+        <footer className="py-16 text-center text-gray-500 text-sm">
+          <p>
+            © {new Date().getFullYear()} {name}. All rights reserved.
+          </p>
+          {socialLinks.length > 0 && (
+            <div className="flex justify-center gap-4 mt-4">
+              {socialLinks.map((l, i) => (
+                <a
+                  key={i}
+                  href={l.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={l.platform}
+                  className="text-gray-500 hover:text-white transition-colors"
+                >
+                  <SocialIcon platform={l.platform} />
+                </a>
+              ))}
+            </div>
+          )}
+        </footer>
+      </div>
     </div>
   );
 }
